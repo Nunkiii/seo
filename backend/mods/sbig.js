@@ -88,12 +88,24 @@ var ob_tpl = {
 
 
 class sbig_driver{
+
+    get_locked_cam(sock, cam_id){
+	
+	var cam=this.cams[cam_id];
+
+	if(cam===undefined) return undefined; 
+
+	if(cam.uid===undefined || cam.uid!=sock.session.id)
+	    return undefined;
+	return cam;
+    }
+    
     constructor(){
 	var sbd=this;
-
+	
 	this.cams={};
+	
 	sbig.usb_info(function(data){
-	    
 	    
 	    console.log("USB Info :" + JSON.stringify(data,null,4));
 	    
@@ -129,6 +141,7 @@ class sbig_driver{
 	    release_camera : function(msg, reply){
 		var cid=msg.data.cam_id;
 		var cam=sbd.cams[cid];
+
 		if(cam===undefined)
 		    return reply({ error : "No such camera!"});
 
@@ -150,12 +163,19 @@ class sbig_driver{
 	    },
 
 	    submit_ob : function(msg, reply){
-		console.log("Executing OB " + JSON.stringify(msg.data, null, 10));
+		var cam=sbd.get_locked_cam(this, msg.data.cam_id);
+		if(cam===undefined){
+		    return reply({ error : "Camera is in use"});
+		    
+		}
+		console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
 	    }
 	    
 	    
 	}
     }
+
+    
     
 };
 

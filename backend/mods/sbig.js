@@ -4,6 +4,89 @@
 var seo = arguments[0];
 var sbig = seo.require('./lib/sbig');
 
+var ob_tpl = {
+
+    name : "Observation Block",
+    
+    objects : {
+	
+	object_settings : {
+
+	    objects : {
+	    
+	    imagetype : {
+		name : "Image type",
+		type: "string"
+	    },
+	    
+            exptime : {
+		name : "Exposure time",
+		type : "number"
+	    },
+	    
+	    nexpo : {
+		name : "Number of exposures",
+		type : "number"
+	    },
+	    
+	    filter : {
+		name : "Filter name",
+		type: "string"
+	    },
+	    
+	    object : {
+		name : "Target object description",
+		type: "string"
+	    }
+	    }
+	},
+	
+	ccd_settings : {
+	    objects : {
+	    cooling_enabled: {
+		name : "Cooling enabled",
+		type: "string"
+	    },
+	    cooling_setpoint : {
+		name : "Cooling setpoint",
+		type: "number"
+	    },
+	    frametyp : {
+		name : "Frame type",
+		type: "string"
+	    },
+	    binning : {
+		name : "Binning mode",
+		type: "string"
+	    },
+	    subframe : {
+		name : "Subframe definition",
+		objects : {
+		    x0 : {
+			name : "X0",
+			type : "number"
+		    },
+		    y0 : {
+			name : "Y0",
+			type : "number"
+		    },
+		    xf : {
+			name : "XF",
+			type : "number"
+		    },
+		    yf : {
+			name : "YF",
+			type : "number"
+		    }
+		}
+	    }
+	    }
+	}
+    }
+};
+
+
+
 class sbig_driver{
     constructor(){
 	var sbd=this;
@@ -60,7 +143,16 @@ class sbig_driver{
 	    },
 	    get_cooling_info : function(msg, reply){
 		
+	    },
+
+	    get_ob_template : function(msg, reply){
+		reply(ob_tpl);
+	    },
+
+	    submit_ob : function(msg, reply){
+		console.log("Executing OB " + JSON.stringify(msg.data, null, 10));
 	    }
+	    
 	    
 	}
     }

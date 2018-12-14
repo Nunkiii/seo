@@ -1,0 +1,124 @@
+<style>
+
+ .ws_toolbar_icon{
+     font-size:1.5em;
+     cursor: pointer;
+ }
+
+ .ws_status{
+     display: inline-block;
+     font-size: .8em;
+     margin-left: 1em;
+ }
+
+ .ws_container{
+     border-radius: .3em;
+     padding: .3em;
+     margin-left: .5em;
+ }
+
+ .ws_btn {
+     border: 0px;
+     background: none;
+     width: 2.5em;
+
+ }
+ .ws_btn:hover{
+
+ }
+
+ .ws_top {
+     display : inline-block;
+ }
+ 
+</style>
+
+
+<div class="ws_top">
+    <button data-var="btn" class="btn ws_btn">?</button><span class="ws_status" data-var="status">Action status</span>
+</div>
+
+
+<script class="builder">
+ var viewer=this;
+ var status=this.status; 
+ 
+ this.btn.addEventListener("click",function(){
+     console.log("click client connected = " + viewer.client.connected);
+     viewer.client.connected==true ? 
+     viewer.client.disconnect() : viewer.client.connect();
+     
+ });
+ 
+ this.attach_client=function( ws_client ){
+     viewer.client=ws_client;
+     status.innerHTML=viewer.client.peer.url;
+     
+     viewer.client.on("event", function(m){
+	 
+	 viewer.draw(m.msg);
+     });
+
+     this.draw();
+ }
+
+ this.create_icon=function(class_name, color){
+     var span=document.createElement("i");
+     span.style.color=color;
+     span.className=class_name;
+     this.btn.innerHTML="";
+     this.btn.appendChild(span);
+    // this.icon.parentNode.replaceChild(span, this.icon);
+     this.icon=span;
+     
+     return span;
+ }
+ 
+ this.draw = function(m){
+//     this.status.style.display="none";
+     if(m===undefined) m="";
+     if(viewer.client==undefined){
+	 status.innerHTML="<strong>Unknown</strong> ";
+	 return;
+     }
+     console.log("Viewer draw " + viewer.client.status);
+
+     switch(viewer.client.status){
+	 case "opened":
+	     status.innerHTML="<strong class='text-success'>online</strong> " ;
+	     //icon.className="ws_toolbar_icon fas fa-toggle-on";
+	     viewer.create_icon("ws_toolbar_icon fa fa-broadcast-tower","green");
+	     
+	     //viewer.cnt.className="ws_container alert alert-success";
+	     break;
+	 case "closed" :
+	     status.innerHTML="<strong>Closed</strong> ";
+	     //icon.className="fas fa-toggle-off";
+	     
+	     viewer.create_icon("ws_toolbar_icon fa fa-dizzy");
+	     this.icon.style.color="tomato";
+	     //this.cnt.className="ws_container alert alert-primary";
+	     break;
+	     //this.cnt.className="ws_container alert alert-danger";
+	 case "connecting":
+	     status.innerHTML="<strong>Connecting to</strong> " + viewer.client.peer.url + " ... ";
+	     viewer.create_icon("ws_toolbar_icon fa fa-cog fa-spin fa-3x fa-fw");
+	     this.icon.style.color="#aaa";
+	     //this.cnt.className="ws_container alert alert-primary";
+	 default: break;
+	     
+     };
+
+     if(viewer.client.error!==undefined){
+	 status.innerHTML="<strong class='text-danger'>Error</strong> " + viewer.client.error;
+	 viewer.create_icon("ws_toolbar_icon fa fa-exclamation-triangle");
+	 this.icon.style.color="red";
+     }
+	     
+
+ }
+
+ this.draw();
+ 
+ console.log("Websocket builder done!");
+</script>

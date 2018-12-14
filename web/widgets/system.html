@@ -1,0 +1,225 @@
+
+<script class="builder">
+
+ 'use strict';
+ 
+ var sys=this;
+
+
+ var browser_info = {
+     options: [],
+     header: [navigator.platform, navigator.userAgent, navigator.appVersion, navigator.vendor, window.opera],
+     dataos: [
+         { name: 'Windows Phone', value: 'Windows Phone', version: 'OS' },
+         { name: 'Windows', value: 'Win', version: 'NT' },
+         { name: 'iPhone', value: 'iPhone', version: 'OS' },
+         { name: 'iPad', value: 'iPad', version: 'OS' },
+         { name: 'Kindle', value: 'Silk', version: 'Silk' },
+         { name: 'Android', value: 'Android', version: 'Android' },
+         { name: 'PlayBook', value: 'PlayBook', version: 'OS' },
+         { name: 'BlackBerry', value: 'BlackBerry', version: '/' },
+         { name: 'Macintosh', value: 'Mac', version: 'OS X' },
+         { name: 'Linux', value: 'Linux', version: 'rv' },
+         { name: 'Palm', value: 'Palm', version: 'PalmOS' }
+     ],
+     databrowser: [
+         { name: 'Chrome', value: 'Chrome', version: 'Chrome' },
+         { name: 'Firefox', value: 'Firefox', version: 'Firefox' },
+         { name: 'Safari', value: 'Safari', version: 'Version' },
+         { name: 'Internet Explorer', value: 'MSIE', version: 'MSIE' },
+         { name: 'Opera', value: 'Opera', version: 'Opera' },
+         { name: 'BlackBerry', value: 'CLDC', version: 'CLDC' },
+         { name: 'Mozilla', value: 'Mozilla', version: 'Mozilla' }
+     ],
+     init: function () {
+         var agent = this.header.join(' '),
+             os = this.matchItem(agent, this.dataos),
+             browser = this.matchItem(agent, this.databrowser);
+         
+         return { os: os, browser: browser };
+     },
+     matchItem: function (string, data) {
+         var i = 0,
+             j = 0,
+             html = '',
+             regex,
+             regexv,
+             match,
+             matches,
+             version;
+         
+         for (i = 0; i < data.length; i += 1) {
+             regex = new RegExp(data[i].value, 'i');
+             match = regex.test(string);
+             if (match) {
+                 regexv = new RegExp(data[i].version + '[- /:;]([\\d._]+)', 'i');
+                 matches = string.match(regexv);
+                 version = '';
+                 if (matches) { if (matches[1]) { matches = matches[1]; } }
+                 if (matches) {
+                     matches = matches.split(/[._]+/);
+                     for (j = 0; j < matches.length; j += 1) {
+                         if (j === 0) {
+                             version += matches[j] + '.';
+                         } else {
+                             version += matches[j];
+                         }
+                     }
+                 } else {
+                     version = '0';
+                 }
+                 return {
+                     name: data[i].name,
+                     version: parseFloat(version)
+                 };
+             }
+         }
+         return { name: 'unknown', version: 0 };
+     }
+ };
+ 
+ var event=ws_event.event;
+ 
+ class seo extends event {
+
+     constructor(){
+	 super();
+	 this.ws_server= new ws_web.server();
+	 //this.ws_client=this.ws_server.create_client({path: "ws"});
+	 this.id_data={};
+	 this.browser = browser_info.init();
+	 
+     }
+     
+     new_socket(options){
+	 if(options===undefined) options={};
+	 if(options.path===undefined) options.path="ws";
+	 
+	 return this.ws_server.create_client(options);
+     }
+     
+     open_socket(options){
+	 var w=this; 
+	 return new Promise(function(ok,fail){
+	     var socket;
+	     socket=w.new_socket(options);
+	     if(socket===undefined)
+		 fail();
+	     else{
+		 if(!socket.connected)
+		     socket.connect().then(function(){ok(socket);}).catch(fail);
+		 else{
+		     console.log("Already connected!@");
+		     ok(socket);
+		 }
+	     }
+	 });
+     }
+     close_socket(socket){
+	 if(socket===undefined) return false;
+	 if(socket.connected)
+	     socket.disconnect();
+	 return true;
+     }
+
+     
+     load_identity(){
+	 var id_data=localStorage.getItem("ident");
+	 if(id_data!==undefined){
+	     this.id_data=JSON.parse(id_data);
+	 }else{
+	     
+	 }
+     }
+
+     save_identity(){
+	 localStorage.setItem("ident",JSON.stringify(this.id_data));
+	 this.signal("ident",{});
+     }
+     
+     start(){
+	 var so=this;
+	 so.open_socket( { mod_pack_name: "system", mod_pack : {
+	     broadcast : function(msg, reply){
+		 console.log("Broadcast message : " + JSON.stringify(msg.data));
+	     }
+	 }}).then(function(socket){
+	     so.socket=socket;
+	     so.load_identity();
+	     var ident_data={ browser : so.browser};
+	     
+	     if(so.id_data && so.id_data.session!==undefined)
+		 ident_data.session=so.id_data.session;
+
+	     socket.query("system/ident", ident_data, function(reply){
+		 so.id_data=reply.data;
+		 so.save_identity();
+	     });
+
+	     socket.query("system/set_broadcast_stations", { monitor : true} , function(reply){
+		 console.log("set_bs reply : " + JSON.stringify(reply.data));
+	     });
+
+	     
+	     
+	 }).catch(function(){
+	     console.log("Websocket error ");
+	 });
+     }
+     
+ };
+ 
+ sys.maestro=new seo();
+ window.sm=sys.maestro;
+ 
+ sm.start();
+ 
+ /* 
+  *  this.services={};
+  * 
+  *  this.get_service = function(service_name){
+  *      return srv=this.services[service_name];
+  *  }
+  *  
+  *  this.on = function (service_name, cb){
+  *      var srv=sys.get_service(service_name);
+  *      srv.cbs.push(cb);
+  *      if(srv.online==true) cb.call(srv,srv);
+  *  }
+  * 
+  *  this.create_service = function(service_name, service){
+  *      var srv={
+  * 	 name : service_name,
+  * 	 online : false,
+  * 	 cbs : [],
+  * 	 srv : service
+  *      };
+  * 	 
+  *      this.services[service_name]=srv;
+  *      return srv;
+  *  }
+  *  
+  *  this.start_service = function(service_name, service){
+  *      var srv=sys.get_service(service_name);
+  *      srv.srv=service;
+  *      srv.online=true;
+  *      srv.cbs.forEach(function(cb){cb.call(srv,srv);});
+  *  }
+  *  
+  *  this.stop_service = function(service_name){
+  *      var srv=sys.get_service(service_name);
+  *      srv.srv=undefined;
+  *      srv.online=false;
+  *      srv.cbs.forEach(function(cb){cb.call(srv,srv);});
+  *  }
+  * */
+ 
+ 
+ 
+ 
+ /* this.start_service("ws_server", this.ws_server);
+  * this.start_service("ws_client", this.ws_client);*/
+ 
+
+
+</script>

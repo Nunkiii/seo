@@ -1,0 +1,88 @@
+
+<x-widget data-class="glscreen" name="gls"></x-widget>
+
+<script class="builder">
+
+ var FITS = astro.FITS;
+ 
+ 
+ function image(blob, dx, dy, ext){
+     this.dims=[0,0];
+     if(dx!==undefined) this.dims[0]=dx;
+     if(dy!==undefined) this.dims[1]=dy;
+     if(blob!==undefined) this.data=blob;
+     if(ext!==undefined) this.ext=ext;
+ }
+ 
+ 
+ function write_footer(){
+     
+ }
+ 
+
+ var cams=this;
+ 
+ setTimeout(function(){
+
+     var fits_file = cams.arguments["data-fits-file"];
+     if(fits_file===undefined){
+	 console.log("NO FITS FILE!");
+	 return;
+     }
+     //fits_file="lib/fits/ngc6934_v.fits";
+     
+     cams.childs.gls.start().then(function(gls){
+	 
+	 console.log("Loading FITS data ...");
+	 
+	 xhr_query(fits_file, {type : "blob"}).then(function(data){
+	     console.log("Received FITS data ....");
+	     write_footer("Opening FITS data ...");
+	     var fits = new FITS(data, function(){
+		 
+		 console.log("FITS opened");
+		 var hdu = this.getHDU();
+		 var header = hdu.header;
+		 var dataunit=hdu.data;
+		 
+		 var opts={ dataunit : dataunit };
+		 
+		 write_footer("Processing FITS pixels  ...");
+		 // Get pixels representing the image and pass callback with options
+		 dataunit.getFrame(0, function(data, opts){// Get dataunit, width, and height from options
+		     write_footer("FITS data ready ...");
+		     
+		     var dataunit = opts.dataunit;
+		     var w= dataunit.width;
+		     var h= dataunit.height;
+		     var ext = dataunit.getExtent(data);
+		     
+		     var img=new image(data , w, h, ext);
+		     
+		     console.log("Frame read : D=("+w+","+h+")  extent " + ext[0] + "," + ext[1] + " wh="+w+","+h);
+
+		     gls.glm.create_layer(img).then(function(){
+			 console.log("OK");
+			 gls.glm.render();
+		     }).catch(function(e){
+			console.error(e);
+		     });
+		     
+		 }, opts);
+		 
+	     });
+	     
+	 }).catch(function(e){
+	     console.error("Error loading fits file " + e);
+	 });
+	 
+	 
+     });
+     //fits_widget(cams.glwindow, cams.childs.cuts.cmap_div, "lib/fits/ngc6934_v.fits");
+     
+     // console.log("TIMEO");
+     
+	
+ }, 1000);
+
+</script>

@@ -1,0 +1,161 @@
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style>
+ .cmap {
+     display : flex;
+     flex-direction: column;
+ }
+ .cmap > h1 {
+     flex: 1 0 auto;
+     margin: 0px;
+ }
+ 
+ .cmap > svg {
+     flex: 0 1 auto;
+     z-index: 2;
+ }
+
+ .colors {
+/*     position: relative;  */
+     width: 100px;
+     height: 20px;
+     z-index: 0;
+ }
+ 
+</style>
+
+<div class="cmap" data-var="cnt">
+    <div data-var="colors" class="colors"></div>
+    <svg data-var="histoplot"> </svg> 
+</div>
+
+
+<script class="builder">
+ var obj=this;
+
+ var margin ={
+     top: 0, // obj.cmap_div.offsetHeight,
+     right: 0, bottom: 30, left: 0
+ };
+
+ var width,height,bbox;
+ 
+ setTimeout(function(){
+	 
+     var svg = d3.select(obj.histoplot);
+     
+     //console.log("SVG is " + svg + " h1 height = " + obj.cmap_div.offsetHeight + " cmap " + obj.cmap) ;
+
+     obj.histoplot.style.height=50+"px"; //obj.cmap_div.offsetHeight;
+     
+
+     function resize(){
+     
+	 bbox=obj.histoplot.getBoundingClientRect(); //svg.getBBox();
+	 
+	 
+	 
+	 width = +bbox.width - margin.left - margin.right;
+	 height = +bbox.height - margin.top - margin.bottom;
+	 
+	 //obj.cmap_div.style.marginLeft=margin.left+"px";
+	 //obj.cmap_div.style.marginRight=margin.right+"px";
+     }
+
+     var cut_pos=[0,100];
+     var cut_bounds=[0,10000];
+     var cut_values=[1000,2000];
+     var cut_lines=[];
+
+     function draw(){
+	 obj.histoplot.innerHTML="";
+	 var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	 
+	 var xscale=obj.xscale=d3.scaleLinear(); //.rangeRound([height, 0]);
+	 xscale.range([0,bbox.width-margin.right-margin.left]);
+	 xscale.domain(cut_bounds);
+	 
+	 /* g.append("g")
+	  *  .call(d3.axisBottom(x))
+      *  .attr("transform", "translate(0," + height + ")")
+	  *  .text("Price ($)");*/
+	 
+	 obj.gscale=g.append("g")
+	 //   .attr("transform", "translate(0," + height + ")")
+		     .call(d3.axisBottom(xscale))
+		     .append("text")
+		     .attr("fill", "#000");
+	 //.attr("y", 30)
+	 //.attr("x", -10)
+	 //      .attr("dy", "0.71em")
+	 //.attr("text-anchor", "end")
+	 //.text("Intensity (ADU) ");
+
+	 var gcuts = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	 
+	 //var maxpos=bbox.width-margin.right-margin.left;
+	 
+	 cut_lines[0]=
+	     gcuts.append("line")
+		  .attr("x1", cut_pos[0])
+		  .attr("y1", 0)
+		  .attr("x2", cut_pos[0])
+		  .attr("y2", 50)
+		  .attr("stroke-width", 2)
+		  .attr("stroke", "red");
+	 
+	 cut_lines[1]=
+	     gcuts.append("line")
+		  .attr("x1", cut_pos[1])
+		  .attr("y1", 0)
+		  .attr("x2", cut_pos[1])
+		  .attr("y2", 50)
+		  .attr("stroke-width", 2)
+		  .attr("stroke", "green");
+
+	 //console.log("SVG bbox " + JSON.stringify(bbox));
+	 
+     }
+     
+     window.addEventListener("resize", function(){
+	 //console.log("Resize !!");
+	 resize();
+	 draw();
+     });
+
+     obj.update_cuts = function(bounds, values){
+
+	 cut_bounds[0]=bounds[0];cut_bounds[1]=bounds[1];
+	 cut_values[0]=values[0];cut_values[1]=values[1];
+
+	 var maxpos=bbox.width-margin.right-margin.left;
+	 var d= maxpos/(cut_bounds[1]-cut_bounds[0]);
+
+
+
+	 //obj.xscale.domain(cut_bounds);
+	 //obj.gscale.call(d3.axisBottom(obj.xscale));
+	 
+	 //console.log("UP CUTS " + bounds.toString() + " val " + values.toString() + " d = " + d );
+
+	 cut_pos[0]=(cut_values[0]-cut_bounds[0])*d;
+	 cut_pos[1]=(cut_values[1]-cut_bounds[0])*d;
+
+	 //bbox.left=0;	 bbox.top=0; margin.left=0; margin.top=0;
+	 //cut_pos=[100,150];
+	 
+	 obj.colors.style.marginLeft="0px";//(bbox.left+margin.left+cut_pos[0])+"px";
+	 obj.colors.style.marginTop="0px";//(bbox.top+margin.top+20)+"px";
+	 obj.colors.style.width=(cut_pos[1]-cut_pos[0])+"px";
+	 
+	 draw();
+     }
+     resize();
+     draw();
+     
+     
+ }, 1000);
+
+
+ 
+</script>

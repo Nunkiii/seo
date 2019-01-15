@@ -104,34 +104,54 @@ class sbig_driver{
 	    return undefined;
 	return cam;
     }
+
+    usb_scan(){
+	var sbd=this;
+	this.cams={};
+	return new Promise(function(ok, fail){
+	    sbig.usb_info(function(data){
+		
+		console.log("USB Info :" + JSON.stringify(data,null,4));
+		
+		if(data.length==0){
+		    console.log("No SBIG camera found!");
+		    fail("No SBIG camera found!");
+		    return;
+		}
+		data.forEach(function(cam){
+		    sbd.cams[cam.id]=cam;
+		    sbd.cams[cam.id].uid=undefined;
+
+		    
+		    
+		});
+		ok(sbd.cams);
+	    });
+	});
+	
+    }
     
     constructor(){
 	var sbd=this;
 	
-	this.cams={};
-	
-	sbig.usb_info(function(data){
-	    
-	    console.log("USB Info :" + JSON.stringify(data,null,4));
-	    
-	    if(data.length==0){
-		console.log("No SBIG camera found!");
-		return;
-	    }
-	    data.forEach(function(cam){
-		sbd.cams[cam.id]=cam;
-		sbd.cams[cam.id].uid=undefined;
-	    });
-	});
+	this.usb_scan().catch(function(m){});
 	
 	this.mods={
-	
+	    
 	    cam_info : function(msg, reply){
 	    
 		reply(sbd.cams);
 	    },
+	    
+	    usb_scan : function(msg, reply){
+		sbd.usb_scan().then(function(cams){
+		    reply(cams);
+		}).catch(function(m){
+		    reply({ error : m});
+		});
+	    },
 	    use_camera : function(msg, reply){
-	    var cid=msg.data.cam_id;
+		var cid=msg.data.cam_id;
 		var cam=sbd.cams[cid];
 		if(cam===undefined)
 		    return reply({ error : "No such camera!"});
@@ -141,14 +161,19 @@ class sbig_driver{
 		    seo.sm.broadcast("sbig","locked", { uid : cam.uid, cid: cid});
 		    for(var p in cam) console.log("Cam prop " + p);
 		    
-		    sbd.open_device(cid).then(function(msg){
-			console.log("OpenDevice Info " + msg.type);
+		    sbd.open_device(cid, function(msg){
+			console.log("OpenDevice Info " + JSON.stringify(msg.type));
 			
-			if(init_message.type=="success") 
-			    reply({});
-		    }).catch(function(msg){
-			console.log("OpenDevice Error " + msg.content);
-			reply({ error : msg.content});
+			if(msg.type=="success"){
+			}
+			if(msg.type=="error"){ 
+			    console.log("OpenDevice Error " + msg);
+			}
+			
+			if(msg.type=="success"){
+			    reply(msg);
+			}else
+			    reply(msg, true);
 		    });
 		    
 		}else
@@ -164,10 +189,18 @@ class sbig_driver{
 		if(cam.uid==this.session.id){
 		    cam.uid=undefined;
 		    seo.sm.broadcast("sbig","unlocked", {cid: cid});
-		    cam.shutdown(function(msg){
-			console.log(cam.name + " SHUTDOWN : " + JSON.stringify(msg));
-			reply({});
-			console.log("Cam unlocked");
+		    if(cam.dev.shutdown==undefined){
+			console.log("ERREUUrre");
+			for(var b in cam.dev) console.log("--> " + b);
+		    }
+		    cam.dev.shutdown(function(msg){
+			console.log(cam.name + " SHUTDOWN message : " + JSON.stringify(msg));
+			//console.log("UNLOCKED!!OK");
+			if(msg.type=="success"){
+			    reply({ok : "OK!"});
+			    
+			    console.log("Cam unlocked");
+			}
 		    });
 		    
 		}else
@@ -175,9 +208,34 @@ class sbig_driver{
 		
 	    },
 	    get_cooling_info : function(msg, reply){
-		
+		var cid=msg.data.cam_id;
+		if(cid===undefined) return reply({ error : "no cid"});
+		var cam=sbd.cams[cid];
+		if(cam===undefined) return reply({ error : "no cam"});
+		if(cam.dev===undefined)return reply({ error : "dev not open"});
+
+		try{
+		    var cooling_info=cam.dev.get_temp();
+		    //console.log("Getting cooling info " + JSON.stringify(cooling_info));
+		    reply(cooling_info);
+		}catch(e){
+		    reply({error : e});
+		}
 	    },
 	    set_cooling_info : function(msg, reply){
+		var cid=msg.data.cam_id;
+		if(cid===undefined) return reply({ error : "no cid"});
+		var cam=sbd.cams[cid];
+		if(cam===undefined) return reply({ error : "no cam"});
+		if(cam.dev===undefined)return reply({ error : "dev not open"});
+
+		try{
+		    cam.dev.set_temp(msg.data.cooling_info);
+		    //console.log("Getting cooling info " + JSON.stringify(cooling_info));
+		    reply({});
+		}catch(e){
+		    reply({error : e});
+		}
 		
 	    },
 	    get_ob_template : function(msg, reply){
@@ -198,7 +256,7 @@ class sbig_driver{
     set_cooling(cam_id, opts){
 
 	var cam=this.cams[cam_id];
-	cam.set_temp(opts.cooling_enabled, opts.cooling_setpoint); //Setting temperature regulation 
+	cam.dev.set_temp(opts.cooling_enabled, opts.cooling_setpoint); //Setting temperature regulation 
 	console.log("Cam cooling info = " + JSON.stringify(cam.get_temp()));
     }
     
@@ -207,7 +265,7 @@ class sbig_driver{
 	var obj_opts=opts.objects.object_settings.objects;
 	
 	var cam=this.cams[cam_id];
-
+	
 	
 	
 	var cam_options = {
@@ -250,7 +308,7 @@ class sbig_driver{
 
 	console.log("Starting exposure " + JSON.strigify(cam_options, null, 4));
 	
-	cam.start_exposure(cam_options, function (expo_message){
+	cam.dev.start_exposure(cam_options, function (expo_message){
 	    
 	    console.log("EXPO message : " + JSON.stringify(expo_message));
 	    
@@ -260,7 +318,7 @@ class sbig_driver{
 	    
 	    if(expo_message.type=="new_image"){
 		//var img=expo_message.content;  BUG HERE!
-		var img=cam.last_image; //tbr...
+		var img=cam.dev.last_image; //tbr...
 		
 		
 		var fifi=new fits.file;
@@ -278,44 +336,48 @@ class sbig_driver{
     
     close_device(cam_id){
 	var cam=this.cams[cam_id];
+	if(cam.dev !== undefined){
+	    cam.dev.shutdown();
+	    delete cam.dev;
+	    cam.dev=undefined;
+	}
     }
-    open_device(cam_id){
-	return new Promise(function(ok, fail){
-	    var cam=this.cams[cam_id];
+    open_device(cam_id, cb){
+	var cam=this.cams[cam_id];
+	if(cam.dev !== undefined) cam.dev=new sbig.cam();
+	
+	//return new Promise(function(ok, fail){
+
 	    
-	    cam.initialize(cam_id,function (init_message){
+	    
+	cam.dev.initialize(cam_id,function (init_message){
+	    
+	    console.log("CAM1 Init message : " + JSON.stringify(init_message));
+	    
+	    if(init_message.type=="success") {
+		init_message.ccd_info=cam.dev.ccd_info();
+		console.log(cam.name + " ready:\n" + JSON.stringify(init_message,null,5));
+		//console.log(init_message.content + " --> starting exposure.");
+		//take_image(cam,otions);
 		
-		console.log("CAM1 Init : " + JSON.stringify(init_message));
-		
-		
-		if(init_message.type=="success") {
-		    console.log("CCD INFO : " + JSON.stringify(cam.ccd_info(),null,5));
-		    
-		    ok(init_message);
-		    
-		    //console.log(init_message.content + " --> starting exposure.");
-		    //take_image(cam,otions);
-		    
-		    // try{
-		    // 	cam1.filter_wheel(1);
+		// try{
+		// 	cam1.filter_wheel(1);
 		    // }
-		    // catch( e){
-		    // 	console.log("Cannot move any filterwheel " + e);
-		    // }
-		}
-		if(init_message.type=="info") {
-		    ok(init_message);
-		};
-		
-		if(init_message.type=="error") {
-		    fail(init_message);
-		    //console.log(cam.name + " error : " + init_message.content );
-		}
-	    });
+		// catch( e){
+		// 	console.log("Cannot move any filterwheel " + e);
+		// }
+	    }
+	    if(init_message.type=="info") {
+	    };
+	    if(init_message.type=="error") {
+		//console.log(cam.name + " error : " + init_message.content );
+	    }
+	    cb(init_message);
 	});
+	
     }
-			   
-			   
+    
+    
     
 
 };

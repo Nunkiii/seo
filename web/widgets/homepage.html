@@ -1,0 +1,256 @@
+<style>
+
+ .hp_container_top{
+     display : flex;
+     flex-direction: column;
+     justify-content: center;
+     background: black;
+     align-items: center;
+ }
+ 
+ .hp_container{
+
+     background: black;
+     background-image: url("res/bg1.jpg");
+     background-repeat: no-repeat;
+     background-size: 100% 100%;
+     display : flex;
+     flex-direction: column;
+     min-height: 100vh;
+     width: 100%;
+
+     align-items: center;
+ }
+
+ .hp_title{
+     width: 100%;
+     flex-grow: 1;
+     display: flex;
+     flex-direction: row;
+     justify-content: center;
+     align-items: center; 
+ }
+
+
+ .hp_title_image{
+
+ }
+ 
+ .hp_title_image > img{
+     
+     max-width: 80vw;
+ }
+
+ .hp_slogan{
+     font-size: 2em;
+     font-style: italic;
+     color: white;
+     padding: 1em;
+     text-shadow: 1px 1px 3px black;
+ }
+ 
+ .hp_title_image {
+     flex-grow: 0;
+ }
+
+ .hp_content{
+     width: auto;
+     color: #ccc;
+     margin-left: 5rem;
+     margin-right: 5rem;
+     margin-bottom: 2rem;
+     flex-grow: 1;
+     flex: 2 0 auto;
+     height: 0rem;
+     overflow-y: auto;
+ }
+
+ .hp_pills{
+     display: flex;
+     flex-orientation: row;
+     justify-content: space-evenly;
+     width: 100%;
+     margin: 0em;
+     padding: 0em;
+ }
+
+
+ .hp_pills>li{
+     flex-grow: 0;
+     border: 0px solid #aaa;
+     padding: 1em;
+     margin: 1em;
+     box-shadow: 0em 0em .2em .2em rgba(255, 255, 255, .2);
+     border-radius: .0em;
+     max-width: 20em;
+     
+ }
+
+ .hp_pill_title{
+
+     color: white;
+     text-shadow: 1px 1px 2px orange, 0 0 1em red, 0 0 0.2em white;
+     font-size: 1.5em;
+ }
+
+ .hp_pill_text{
+
+     color: #ddd;
+ }
+
+ .hp_toolbar{
+     width: 80%;
+     display: flex;
+     justify-content: flex-end;
+     align-items: flex-end; 
+ }
+ 
+ .hp_phone{
+     flex-grow: 1;
+ }
+
+ .hp_phone>a{
+     display: flex;
+     justify-content: flex-end;
+     align-items: flex-end; 
+ }
+ 
+ .hp_phone>a>img{
+     width: 1.5em;
+     height: 1.5em;
+ }
+ 
+ .hp_phone_number {
+     display: inline-box;
+     color: #eee;
+     text-shadow: 1px 1px 5px black;
+     font-weight: bold;
+     vertical-align: middle;
+     font-size: .8em;
+ }
+
+ @media only screen and (max-device-width : 640px) {
+     .hp_pills{
+	 flex-grow: 1;
+	 flex: 1 1 auto;
+
+	 flex-direction: column;
+	 align-items: center;
+
+     }
+     .hp_pills>li{
+	 margin: 0px;
+     }
+     .hp_pill_title{
+     }
+      .hp_slogan{
+	  font-size: 1.2em;
+      }
+ }
+
+ 
+ 
+</style>
+
+<div class="hp_container_top">
+    <div class="hp_container">
+    <div class="hp_title">
+	<div class="hp_title_image">
+	    <img src="res/title.png"> </img>
+	    	<div class="hp_phone">
+	    <a href="tel:+32 468 08 02 28">
+		<img src="res/voice-call-icon.jpg" style=""></img>
+		<div class="hp_phone_number">+32 468 08 02 28</div>
+		
+	    </a>
+	</div>
+
+	    <div class="hp_slogan">
+
+	    </div>
+	</div>
+    </div>
+    
+    <div class="hp_toolbar">
+	
+
+    </div>
+    
+
+    <!-- <ul class="hp_pills">
+	 <li>
+	 <div class="hp_pill_title">
+	 La Terre dans l'Univers
+	 </div>
+	 <div class="hp_pill_text">
+	 Pour les plus petits, initiation à l'astronomie.
+	 </div>
+	 </li>
+
+	 <li>
+	 <div class="hp_pill_title">
+	 La Terre dans l'Univers
+	 </div>
+	 <div class="hp_pill_text">
+	 Pour les plus petits, initiation à l'astronomie.
+	 </div>
+	 </li>
+
+
+	 <li>
+	 <div class="hp_pill_title">
+	 La Terre dans l'Univers
+	 </div>
+	 <div class="hp_pill_text">
+	 Pour les plus petits, initiation à l'astronomie.
+	 </div>
+	 </li>
+
+
+	 </ul>
+
+	 <div class="hp_content" style="display:block;">
+	 Le mot « galaxie » provient du terme grec désignant notre propre galaxie, ὁ γαλαξίας / ho galaxias (« laiteux », sous-entendu κύκλος / kyklos « cercle »)5, dérivé du nom τὸ γάλα / to gala « lait ». On trouve aussi en grec ancien ὁ τοῦ γάλακτος κύκλος / ho tou galaktos kyklos « le cercle de lait »6, ou encore ὁ κύκλος γαλακτικός / ho kyklos galaktikos, « cercle laiteux »[réf. nécessaire], à cause de son apparence dans le ciel. Dans la mythologie grecque, Zeus plaça son fils Héraclès, né de son union avec la mortelle Alcmène, sur le sein de son épouse Héra lorsqu'elle était endormie afin que le bébé devienne immortel en buvant son lait divin. Lorsque celle-ci se réveilla, elle se rendit compte qu'elle allaitait un bébé inconnu qu'elle repoussa, et un jet de lait aspergea le ciel, formant cette pâle bande lumineuse appelée « Voie lactée ».
+
+	 Dans la littérature astronomique, le mot « Galaxie » muni d'un G majuscule se réfère à notre propre galaxie (la Voie lactée), afin de la distinguer des autres galaxies.
+
+	 Avant la mise en évidence des galaxies, était employé le terme de « nébuleuse », qui décrivait tout objet diffus de la sphère céleste. Cette dénomination remonte à William Herschel, qui établissant son catalogue d'objets du ciel profond, utilisa le terme de « nébuleuse spirale » pour des objets tels que M31. Ceux-ci allaient plus tard être identifiés comme étant d'immenses agglomérations d'étoiles, et lorsque les distances entre elles commencèrent à être comprises, elles furent nommées « univers-îles ». Cependant, cette nomenclature tomba donc en désuétude au profit du terme « galaxie ».
+
+
+	 Le mot « galaxie » provient du terme grec désignant notre propre galaxie, ὁ γαλαξίας / ho galaxias (« laiteux », sous-entendu κύκλος / kyklos « cercle »)5, dérivé du nom τὸ γάλα / to gala « lait ». On trouve aussi en grec ancien ὁ τοῦ γάλακτος κύκλος / ho tou galaktos kyklos « le cercle de lait »6, ou encore ὁ κύκλος γαλακτικός / ho kyklos galaktikos, « cercle laiteux »[réf. nécessaire], à cause de son apparence dans le ciel. Dans la mythologie grecque, Zeus plaça son fils Héraclès, né de son union avec la mortelle Alcmène, sur le sein de son épouse Héra lorsqu'elle était endormie afin que le bébé devienne immortel en buvant son lait divin. Lorsque celle-ci se réveilla, elle se rendit compte qu'elle allaitait un bébé inconnu qu'elle repoussa, et un jet de lait aspergea le ciel, formant cette pâle bande lumineuse appelée « Voie lactée ».
+
+	 Dans la littérature astronomique, le mot « Galaxie » muni d'un G majuscule se réfère à notre propre galaxie (la Voie lactée), afin de la distinguer des autres galaxies.
+
+	 Avant la mise en évidence des galaxies, était employé le terme de « nébuleuse », qui décrivait tout objet diffus de la sphère céleste. Cette dénomination remonte à William Herschel, qui établissant son catalogue d'objets du ciel profond, utilisa le terme de « nébuleuse spirale » pour des objets tels que M31. Ceux-ci allaient plus tard être identifiés comme étant d'immenses agglomérations d'étoiles, et lorsque les distances entre elles commencèrent à être comprises, elles furent nommées « univers-îles ». Cependant, cette nomenclature tomba donc en désuétude au profit du terme « galaxie ».
+
+
+	 Le mot « galaxie » provient du terme grec désignant notre propre galaxie, ὁ γαλαξίας / ho galaxias (« laiteux », sous-entendu κύκλος / kyklos « cercle »)5, dérivé du nom τὸ γάλα / to gala « lait ». On trouve aussi en grec ancien ὁ τοῦ γάλακτος κύκλος / ho tou galaktos kyklos « le cercle de lait »6, ou encore ὁ κύκλος γαλακτικός / ho kyklos galaktikos, « cercle laiteux »[réf. nécessaire], à cause de son apparence dans le ciel. Dans la mythologie grecque, Zeus plaça son fils Héraclès, né de son union avec la mortelle Alcmène, sur le sein de son épouse Héra lorsqu'elle était endormie afin que le bébé devienne immortel en buvant son lait divin. Lorsque celle-ci se réveilla, elle se rendit compte qu'elle allaitait un bébé inconnu qu'elle repoussa, et un jet de lait aspergea le ciel, formant cette pâle bande lumineuse appelée « Voie lactée ».
+
+	 Dans la littérature astronomique, le mot « Galaxie » muni d'un G majuscule se réfère à notre propre galaxie (la Voie lactée), afin de la distinguer des autres galaxies.
+
+	 Avant la mise en évidence des galaxies, était employé le terme de « nébuleuse », qui décrivait tout objet diffus de la sphère céleste. Cette dénomination remonte à William Herschel, qui établissant son catalogue d'objets du ciel profond, utilisa le terme de « nébuleuse spirale » pour des objets tels que M31. Ceux-ci allaient plus tard être identifiés comme étant d'immenses agglomérations d'étoiles, et lorsque les distances entre elles commencèrent à être comprises, elles furent nommées « univers-îles ». Cependant, cette nomenclature tomba donc en désuétude au profit du terme « galaxie ».
+
+
+	 Le mot « galaxie » provient du terme grec désignant notre propre galaxie, ὁ γαλαξίας / ho galaxias (« laiteux », sous-entendu κύκλος / kyklos « cercle »)5, dérivé du nom τὸ γάλα / to gala « lait ». On trouve aussi en grec ancien ὁ τοῦ γάλακτος κύκλος / ho tou galaktos kyklos « le cercle de lait »6, ou encore ὁ κύκλος γαλακτικός / ho kyklos galaktikos, « cercle laiteux »[réf. nécessaire], à cause de son apparence dans le ciel. Dans la mythologie grecque, Zeus plaça son fils Héraclès, né de son union avec la mortelle Alcmène, sur le sein de son épouse Héra lorsqu'elle était endormie afin que le bébé devienne immortel en buvant son lait divin. Lorsque celle-ci se réveilla, elle se rendit compte qu'elle allaitait un bébé inconnu qu'elle repoussa, et un jet de lait aspergea le ciel, formant cette pâle bande lumineuse appelée « Voie lactée ».
+
+	 Dans la littérature astronomique, le mot « Galaxie » muni d'un G majuscule se réfère à notre propre galaxie (la Voie lactée), afin de la distinguer des autres galaxies.
+
+	 Avant la mise en évidence des galaxies, était employé le terme de « nébuleuse », qui décrivait tout objet diffus de la sphère céleste. Cette dénomination remonte à William Herschel, qui établissant son catalogue d'objets du ciel profond, utilisa le terme de « nébuleuse spirale » pour des objets tels que M31. Ceux-ci allaient plus tard être identifiés comme étant d'immenses agglomérations d'étoiles, et lorsque les distances entre elles commencèrent à être comprises, elles furent nommées « univers-îles ». Cependant, cette nomenclature tomba donc en désuétude au profit du terme « galaxie ».
+
+
+	 Le mot « galaxie » provient du terme grec désignant notre propre galaxie, ὁ γαλαξίας / ho galaxias (« laiteux », sous-entendu κύκλος / kyklos « cercle »)5, dérivé du nom τὸ γάλα / to gala « lait ». On trouve aussi en grec ancien ὁ τοῦ γάλακτος κύκλος / ho tou galaktos kyklos « le cercle de lait »6, ou encore ὁ κύκλος γαλακτικός / ho kyklos galaktikos, « cercle laiteux »[réf. nécessaire], à cause de son apparence dans le ciel. Dans la mythologie grecque, Zeus plaça son fils Héraclès, né de son union avec la mortelle Alcmène, sur le sein de son épouse Héra lorsqu'elle était endormie afin que le bébé devienne immortel en buvant son lait divin. Lorsque celle-ci se réveilla, elle se rendit compte qu'elle allaitait un bébé inconnu qu'elle repoussa, et un jet de lait aspergea le ciel, formant cette pâle bande lumineuse appelée « Voie lactée ».
+
+	 Dans la littérature astronomique, le mot « Galaxie » muni d'un G majuscule se réfère à notre propre galaxie (la Voie lactée), afin de la distinguer des autres galaxies.
+
+	 Avant la mise en évidence des galaxies, était employé le terme de « nébuleuse », qui décrivait tout objet diffus de la sphère céleste. Cette dénomination remonte à William Herschel, qui établissant son catalogue d'objets du ciel profond, utilisa le terme de « nébuleuse spirale » pour des objets tels que M31. Ceux-ci allaient plus tard être identifiés comme étant d'immenses agglomérations d'étoiles, et lorsque les distances entre elles commencèrent à être comprises, elles furent nommées « univers-îles ». Cependant, cette nomenclature tomba donc en désuétude au profit du terme « galaxie ».
+
+
+	 Le mot « galaxie » provient du terme grec désignant notre propre galaxie, ὁ γαλαξίας / ho galaxias (« laiteux », sous-entendu κύκλος / kyklos « cercle »)5, dérivé du nom τὸ γάλα / to gala « lait ». On trouve aussi en grec ancien ὁ τοῦ γάλακτος κύκλος / ho tou galaktos kyklos « le cercle de lait »6, ou encore ὁ κύκλος γαλακτικός / ho kyklos galaktikos, « cercle laiteux »[réf. nécessaire], à cause de son apparence dans le ciel. Dans la mythologie grecque, Zeus plaça son fils Héraclès, né de son union avec la mortelle Alcmène, sur le sein de son épouse Héra lorsqu'elle était endormie afin que le bébé devienne immortel en buvant son lait divin. Lorsque celle-ci se réveilla, elle se rendit compte qu'elle allaitait un bébé inconnu qu'elle repoussa, et un jet de lait aspergea le ciel, formant cette pâle bande lumineuse appelée « Voie lactée ».
+
+	 Dans la littérature astronomique, le mot « Galaxie » muni d'un G majuscule se réfère à notre propre galaxie (la Voie lactée), afin de la distinguer des autres galaxies.
+
+	 Avant la mise en évidence des galaxies, était employé le terme de « nébuleuse », qui décrivait tout objet diffus de la sphère céleste. Cette dénomination remonte à William Herschel, qui établissant son catalogue d'objets du ciel profond, utilisa le terme de « nébuleuse spirale » pour des objets tels que M31. Ceux-ci allaient plus tard être identifiés comme étant d'immenses agglomérations d'étoiles, et lorsque les distances entre elles commencèrent à être comprises, elles furent nommées « univers-îles ». Cependant, cette nomenclature tomba donc en désuétude au profit du terme « galaxie ».
+
+	 </div> -->
+</div>
+</div>

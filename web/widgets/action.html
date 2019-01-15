@@ -1,0 +1,110 @@
+<style>
+ .action{
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+ }
+ .action > span{
+     flex: 1 1 auto;
+     
+ }
+ 
+ .action > button{
+     flex: 0 1 auto;
+ }
+ .spin{
+     color: springgreen;
+     font-size: 1.5em;
+ }
+</style>
+
+<div class="action">
+    <span data-var="ci" class=""></span> <button data-var="b" type="button" class="btn btn-primary btn-sm">No-Action</button>
+</div>
+
+
+<script class="builder">
+ var a=this;
+
+ var button_handler;
+
+ a.b.disabled=true;
+ 
+ this.b.addEventListener("click", function(){
+     if(button_handler!==undefined)
+	 button_handler();
+ });
+
+
+ this.set_text=function(txt){
+
+
+ }
+ 
+ this.wait=function(cfg ){
+     a.ci.innerHTML="<i class=\"spin fas fa-cog fa-spin\"></i> ";
+     a.b.innerHTML="";
+     
+     if(cfg.message!==undefined)
+	 a.ci.innerHTML+=" "+cfg.message;
+     
+     if(cfg.button_message!==undefined){
+ 	 a.b.style.display="";
+	 a.b.innerHTML+=" "+cfg.button_message;
+     }else{
+	 a.b.style.display="none";
+     }
+     
+     if(cfg.wait_cb!==undefined){
+	 a.b.disabled=false;
+	 button_handler=cfg.wait_cb;
+     }else{
+	 a.b.disabled=true;
+     }
+ }
+
+ this.start=function(cfg){
+     a.b.innerHTML="";
+     
+     if(cfg.message!==undefined)
+	 a.ci.innerHTML=cfg.message;
+     if(cfg.button_message!==undefined){
+	 a.b.style.display="";
+	 a.b.innerHTML=" "+cfg.button_message;
+     }else{
+	 a.b.style.display="none";
+     }
+     if(cfg.start_cb!==undefined){
+	 a.b.disabled=false;
+	 button_handler=cfg.start_cb;
+     }else{
+	 a.b.disabled=true;
+     }
+     
+ }
+
+ this.error=function(cfg){
+     a.ci.innerHTML="<i class=\"text-danger fa fa-cog fa-exclamation\"></i> ";
+     a.b.innerHTML="";
+	 
+     if(cfg.message!==undefined)
+	 a.ci.innerHTML+=" "+cfg.message;
+     
+     if(cfg.button_message!==undefined){
+	 a.b.style.display="";
+	 a.b.innerHTML+=" "+cfg.button_message;
+     }else{
+	 a.b.style.display="none";
+     }
+     
+     if(cfg.error_cb!==undefined){
+	 a.b.disabled=false;
+	 button_handler=cfg.wait_cb;
+     }else{
+	 a.b.disabled=true;
+     }
+     
+ }
+ 
+</script>

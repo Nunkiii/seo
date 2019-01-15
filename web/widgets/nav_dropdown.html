@@ -1,0 +1,46 @@
+<style>
+  .x{
+      color: green;
+      font-size: 1.5em;
+
+  }
+ .dropdown-menu{
+     min-width: 15em;
+ }
+ .dropdown-menu > ass > span.col {
+     border: 1px solid blue;
+     white-space: nowrap;
+     display: block;
+ }
+</style>
+
+
+
+<li data-var="menu" class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="fas fa-user" style="color:tomato;"></span> User</a>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown01">
+	<!-- <a class="dropdown-item row" href="#"><i class="x col"><i class="fa fa-user-plus"></i></i><span class="col text-nowrap">Create new account</span></a>
+	     <a class="dropdown-item row" href="#"><i class="x col" ><i class="fa fa-sign-in-alt"></i></i><span class="col">Login</span></a>
+	   -->
+	
+	<a data-var="create_user" class="dropdown-item"><i class="x col-4 text-center "><i class="fa fa-user-plus"></i></i><span class="col text-left align-self-center"><span>Create new account</span></span></a>
+	<a data-var="login" class="dropdown-item"><i class="x col-4 text-center"><i class="fa fa-sign-in-alt"></i></i><span class="col  text-left align-self-center">Login</span></a>
+	
+
+    </div>
+</li>
+<script class="builder">
+ 
+ this.menu.addEventListener("click",function(){
+     for(var n in window.widget_tree.childs) console.log("CHILD " + n);
+//     window.widget_tree.childs.layout.set_main("login");
+ });
+
+ this.create_user.addEventListener("click", function(){
+     window.widget_tree.childs.layout.set_main("create_user");
+ });
+ this.login.addEventListener("click", function(){
+     window.widget_tree.childs.layout.set_main("login");
+ });
+ 
+</script>

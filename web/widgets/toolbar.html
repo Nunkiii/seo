@@ -1,0 +1,100 @@
+<style>
+</style>
+
+
+<nav class="navbar navbar-expand-md navbar-toggleable-md bg-faded navbar-dark bg-dark">
+
+    <a class="navbar-brand" href="#">
+	
+	<span data-var="brand"> <image src="lib/title.png" style="width: 180px;"></image> </span>
+	<!-- <x-widget data-class="websocket" name="ws_view"></x-widget> -->
+    </a>
+
+    
+    
+    <button data-var="collaps_but" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+	<span class="navbar-toggler-icon"></span>
+    </button>
+
+
+    <div data-var="collapse" class="collapse navbar-collapse" id="navbarCollapse" style="z-index : 100;">
+
+
+    </div>
+
+</nav>
+
+<script class="builder">
+
+ var lay=this;
+ lay.menu_opened=false;
+
+ console.log("Toolbar build ! " );
+
+ factory.create_widget("navbar_nav", lay, lay.collapse).then(function(nav){
+     nav.ul.classList.add("mr-auto");
+     
+     nav.add_item("Blog").then(function(item){
+	 item.li.addEventListener("click",function(){});
+	 item.icon.setAttribute("class", "fa fa-rss");
+	 item.icon.setAttribute("style","color : #9999FF;");
+     });
+     
+     nav.add_item("Consulting").then(function(item){
+	 item.li.addEventListener("click",function(){});
+	 item.icon.className="fas fa-id-badge";
+     });
+
+     
+     factory.create_widget("navbar_nav", lay, lay.collapse).then(function(nav){
+	 nav.ul.classList.add("ml-auto");
+	 factory.create_widget("nav_dropdown", nav, nav.ul).then(function(drop){
+	     
+	     factory.create_widget("websocket", nav, nav.ul,"ws_view").then(function(wsv){
+		 wsv.attach_client( widget_tree.find_widget("system").socket);
+	     });
+	     
+	 });
+	 
+     });	 
+     
+     
+ });
+ 
+ 
+ 
+ this.set_brand=function(brand_name){
+     this.brand.innerHTML=brand_name;
+ }
+ 
+ //for(var p in this.childs) console.log(" P " + p);
+// this.childs.ws_view.attach_client( widget_tree.childs.system.manager.ws_client);
+
+ this.close_toolbar_menu = function(){
+     if(lay.menu_opened==true)
+	 $(lay.collaps_but).click();
+     lay.menu_opened=false;
+ }
+ 
+ $(this.collaps_nav).on("shown.bs.collapse", function(e){
+     console.log("Collapse!");
+     lay.menu_opened=true;
+     setTimeout(function(){
+	 //$(lay.collaps_but).click();
+	 //$(lay.collaps_but).collapse();
+	 console.log("DE Collapse!");
+	 
+     }, 1000);
+    
+     return true;
+ });
+
+ this.get_widgets = function(){
+     return [{ name : "Flextest", widget : "two_column"}];
+ }
+
+ this.draw_widgets = function(){
+
+ }
+ 
+</script>

@@ -1,0 +1,18 @@
+<ul data-var="ul" class="navbar-nav" style=""></ul>
+
+<script class="builder">
+ var nav=this;
+ 
+ this.add_item=function(html_content){
+     return new Promise(function(ok,fail){
+	 factory.create_widget("navbar_item", nav, nav.ul).then(function(item){
+	     
+	     console.log("Add item " + html_content);
+	     item.text.innerHTML=" "+html_content;
+	     ok(item);
+	 }).catch(fail);
+	 
+     });
+ }
+	 
+</script>

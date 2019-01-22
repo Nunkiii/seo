@@ -139,8 +139,13 @@ class sbig_driver{
 	this.mods={
 	    
 	    cam_info : function(msg, reply){
-	    
-		reply(sbd.cams);
+		var rep={};
+		for(var c in sbd.cams){
+		    rep[c]={ id : sbd.cams[c].id, name : sbd.cams[c].name, serial: sbd.cams[c].serial, uid :sbd.cams[c].uid };
+		}
+		console.log("Cam info : " + JSON.stringify(rep));
+		
+		reply(rep);
 	    },
 	    
 	    usb_scan : function(msg, reply){
@@ -174,10 +179,31 @@ class sbig_driver{
 			    reply(msg);
 			}else
 			    reply(msg, true);
+
+
+			if(cam.temp_report!==undefined) clearInterval(cam.temp_report);
+			
+			cam.temp_report=setInterval(function(){
+			    if(cam.dev!==undefined){
+				try{
+				    var cooling_info=cam.dev.get_temp();
+				    console.log("cam "+cid + ": Cooling info : " + JSON.stringify(cooling_info));
+				    seo.sm.broadcast("sbig","temp_report", { cid: cid, cooling_info : cooling_info});
+				}
+				catch(e){
+				    seo.sm.broadcast("sbig","temp_report", { cid: cid, cooling_info : { error : e.toString()}});
+				    clearInterval(cam.temp_report);
+				}
+			    }else
+				clearInterval(cam.temp_report);
+			    
+			}, 5000);
 		    });
 		    
 		}else
 		    reply({ error : "Camera is in use!"});
+
+		
 	    },
 	    release_camera : function(msg, reply){
 		var cid=msg.data.cam_id;
@@ -185,6 +211,8 @@ class sbig_driver{
 		
 		if(cam===undefined)
 		    return reply({ error : "No such camera!"});
+
+		if(cam.temp_report!==undefined) clearInterval(cam.temp_report);
 		
 		if(cam.uid==this.session.id){
 		    cam.uid=undefined;
@@ -230,11 +258,11 @@ class sbig_driver{
 		if(cam.dev===undefined)return reply({ error : "dev not open"});
 
 		try{
-		    cam.dev.set_temp(msg.data.cooling_info);
-		    //console.log("Getting cooling info " + JSON.stringify(cooling_info));
+		    console.log("setting cooling info " + JSON.stringify(msg.data.cooling_info));
+		    cam.dev.set_temp(msg.data.cooling_info.enabled,msg.data.cooling_info.setpoint);
 		    reply({});
 		}catch(e){
-		    reply({error : e});
+		    reply({error : e.toString()});
 		}
 		
 	    },
@@ -242,12 +270,19 @@ class sbig_driver{
 		reply(ob_tpl);
 	    },
 	    submit_ob : function(msg, reply){
-		var cam=sbd.get_locked_cam(this, msg.data.cam_id);
+		var cam_id=msg.data.cam_id;
+		var cam=sbd.get_locked_cam(this, cam_id);
 		if(cam===undefined){
 		    return reply({ error : "Camera is in use"});
 		    
 		}
 		console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
+
+		sbd.take_image(cam_id, msg.data.ob, function(answer){
+		    var image=answer.image;
+		    console.log("Got image " + image.width());
+		    reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : image.get_data()}] );
+		});
 		
 	    }
 	}
@@ -260,9 +295,14 @@ class sbig_driver{
 	console.log("Cam cooling info = " + JSON.stringify(cam.get_temp()));
     }
     
-    take_image(cam_id, opts){
+    
+    take_image(cam_id, opts, cb){
+
 	var ccd_opts=opts.objects.ccd_settings.objects;
 	var obj_opts=opts.objects.object_settings.objects;
+
+	console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
+	console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
 	
 	var cam=this.cams[cam_id];
 	
@@ -270,12 +310,12 @@ class sbig_driver{
 	
 	var cam_options = {
 	    
-	    exptime : ccd_opts.exptime,
-	    nexpo : ccd_opts.nexpo,
+	    exptime : obj_opts.exptime.value,
+	    nexpo : obj_opts.nexpo.value,
 	    fast_readout : false,
 	    dual_channel : false,
 	    //light_frame: true,
-	    readout_mode: ccd_opts.binning+"x"+ccd_opts.binning
+	    readout_mode: ccd_opts.binning.value+"x"+ccd_opts.binning.value
 	};
 	
 	switch(opts.frametyp){
@@ -290,7 +330,7 @@ class sbig_driver{
 	default: break;
 	};
 	
-	switch(object_opts.imagetype){
+	switch(obj_opts.imagetype){
 	case "science":
 	    cam_options.light_frame= true;
 	    break;
@@ -306,21 +346,26 @@ class sbig_driver{
 	default: break;
 	}
 
-	console.log("Starting exposure " + JSON.strigify(cam_options, null, 4));
+	console.log("Starting exposure " + JSON.stringify(cam_options, null, 4));
 	
 	cam.dev.start_exposure(cam_options, function (expo_message){
 	    
 	    console.log("EXPO message : " + JSON.stringify(expo_message));
 	    
 	    if(expo_message.started){
+		console.log("Started !");
 		return console.log(expo_message.started);
 	    }
 	    
 	    if(expo_message.type=="new_image"){
 		//var img=expo_message.content;  BUG HERE!
+		console.log("NEW IMAGE !!");
 		var img=cam.dev.last_image; //tbr...
+		cb({ image : img });
+		//var idata=img.get_data();
 		
 		
+		/*
 		var fifi=new fits.file;
 		var date=new Date();
 		
@@ -329,6 +374,7 @@ class sbig_driver{
 		console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
 		
 		fifi.write_image_hdu(img);
+		*/
 	    }
 	});
     }

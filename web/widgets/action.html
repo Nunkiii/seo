@@ -1,13 +1,17 @@
 <style>
  .action{
+     flex: 1 1 auto;
      display: flex;
-     flex-direction: column;
-     justify-content: center;
+     flex-direction: row;
+     justify-content: space-between;
      align-items: center;
+     align-content: center;
+     width: 100%;
  }
  .action > span{
-     flex: 1 1 auto;
-     
+     flex: 0 1 auto;
+     padding-right: 1em;
+     padding-left: 1em;
  }
  
  .action > button{
@@ -19,8 +23,9 @@
  }
 </style>
 
-<div class="action">
-    <span data-var="ci" class=""></span> <button data-var="b" type="button" class="btn btn-primary btn-sm">No-Action</button>
+<div data-var="div" class="action">
+    <span data-var="ci" class=""></span> <button data-var="b" type="button" class="btn btn-success">
+    </button>
 </div>
 
 

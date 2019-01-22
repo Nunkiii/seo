@@ -293,9 +293,9 @@
      
      webgl_start(options){
 	 var gls=this;
-
+	 
 	 return new Promise(function(ok, fail){
-	     console.log("Canvas : " + gls.canvas);
+	     console.log("Canvas is: " + gls_widget.canvas);
 	     var gl=gls.gl=gls_widget.canvas.getContext('experimental-webgl', {preserveDrawingBuffer: true});
 	     
 	     if(!gl)
@@ -306,7 +306,7 @@
 	     
 	     if (!floatTextures)
 		 return fail('WebGL is working, but it does not provide floating point texture on your system !\n\n :< \n\nTry with another video device &| drivers!');
-	 
+	     
 	     
 	     //console.log("WebGL init ok");
 	     ok();
@@ -763,72 +763,74 @@
 	     );
 	 }
 	 
-	 
-	 //var glsl_loc="./"+server_root+"/xd1.glsl";
-	 var glsl_loc="lib/shaders/xd1.glsl";
-	 console.log("Downloading glsl [" + glsl_loc+"]" );
-	 
-	 xhr_query(glsl_loc).then(function(shader_src){
-	     
-	     console.log("GLM linking programs...");
-	     
-	     var texture = gl.createTexture();
-	     var cmap_texture = gl.createTexture();
-	     var cmap_frac = gl.createTexture();
-	     
-	     glm.texture=texture;
-	     glm.cmap_texture=cmap_texture;
-	     glm.cmap_frac=cmap_frac;
-	     
-	     var program = glm.program=gl.createProgram();
-	     var xd1_fragment_shader = create_shader(gl, shader_src);    
-	     
-	     //Simplest vertex shader for the unique "static" screen box : all geometry is done in the fragment shader.
-	     var vertex_shader_src="attribute vec4 vPosition; void main() {gl_Position = vPosition;}";
-	     
-	     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-	     gl.shaderSource(vertexShader, vertex_shader_src);
-	     gl.compileShader(vertexShader);
-	     
-	     gl.attachShader(program, vertexShader);
-	     gl.attachShader(program, xd1_fragment_shader);
-	     
-	     gl.linkProgram(program);
-	     gl.useProgram(program);
-	     
-	     glm.resolutionLocation = gl.getUniformLocation(program, "u_resolution");
-	     glm.le_loc=gl.getUniformLocation(program, "u_layer_enabled");	
-	     glm.zoom_loc=gl.getUniformLocation(program, "u_zoom");
-	     glm.angle_loc=gl.getUniformLocation(program, "u_angle");
-	     glm.tr_loc=gl.getUniformLocation(program, "u_tr");
-	     glm.rotcenter_loc=gl.getUniformLocation(program, "u_rotc");
-	     glm.switches_loc=gl.getUniformLocation(program, "u_switches");
-	     
-	     
-	     gl.uniform4iv(glm.le_loc, layer_enabled);
-	     gl.uniform4iv(glm.switches_loc, switches);
-	     
-	     gl.uniform2f(glm.resolutionLocation, gls_widget.canvas.clientWidth, gls_widget.canvas.clientHeight);
-	     gl.uniform1f(glm.zoom_loc, glm.zoom_value );
-	     // gl.uniform1f(angle_loc, ag.value);
-	     gl.uniform2fv(glm.tr_loc, glm.translation);
-	     gl.uniform2fv(glm.rotcenter_loc, glm.rotation_center);
-	     
-	     update_angle();
-	     
-	     create_vertex_buffer();
-	     
-	     glm.trigger("gl_ready");
-	     
 
-	     console.log("GLM : program ready");
+	 glm.fetch_programs=function(cb){
+	     //var glsl_loc="./"+server_root+"/xd1.glsl";
+	     var glsl_loc="lib/shaders/xd1.glsl";
+	     console.log("Downloading glsl [" + glsl_loc+"]" );
 	     
-	     //cb(null,glm);
-	 }).catch(function(error){
-	     console.log("Error downloading XD1 shader code " + error);
-	     //glm.message("Error while downloading XD1 shader code : "+error, { type : "danger"});
-	     
-	 });
+	     xhr_query(glsl_loc).then(function(shader_src){
+		 
+		 console.log("GLM linking programs...");
+		 
+		 var texture = gl.createTexture();
+		 var cmap_texture = gl.createTexture();
+		 var cmap_frac = gl.createTexture();
+		 
+		 glm.texture=texture;
+		 glm.cmap_texture=cmap_texture;
+		 glm.cmap_frac=cmap_frac;
+		 
+		 var program = glm.program=gl.createProgram();
+		 var xd1_fragment_shader = create_shader(gl, shader_src);    
+		 
+		 //Simplest vertex shader for the unique "static" screen box : all geometry is done in the fragment shader.
+		     var vertex_shader_src="attribute vec4 vPosition; void main() {gl_Position = vPosition;}";
+		 
+		 var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		 gl.shaderSource(vertexShader, vertex_shader_src);
+		 gl.compileShader(vertexShader);
+		 
+		 gl.attachShader(program, vertexShader);
+		 gl.attachShader(program, xd1_fragment_shader);
+		 
+		 gl.linkProgram(program);
+		 gl.useProgram(program);
+		 
+		 glm.resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+		 glm.le_loc=gl.getUniformLocation(program, "u_layer_enabled");	
+		 glm.zoom_loc=gl.getUniformLocation(program, "u_zoom");
+		 glm.angle_loc=gl.getUniformLocation(program, "u_angle");
+		 glm.tr_loc=gl.getUniformLocation(program, "u_tr");
+		 glm.rotcenter_loc=gl.getUniformLocation(program, "u_rotc");
+		 glm.switches_loc=gl.getUniformLocation(program, "u_switches");
+		 
+		 
+		 gl.uniform4iv(glm.le_loc, layer_enabled);
+		 gl.uniform4iv(glm.switches_loc, switches);
+		 
+		 gl.uniform2f(glm.resolutionLocation, gls_widget.canvas.clientWidth, gls_widget.canvas.clientHeight);
+		 gl.uniform1f(glm.zoom_loc, glm.zoom_value );
+		 // gl.uniform1f(angle_loc, ag.value);
+		 gl.uniform2fv(glm.tr_loc, glm.translation);
+		 gl.uniform2fv(glm.rotcenter_loc, glm.rotation_center);
+		 
+		 update_angle();
+		 
+		 create_vertex_buffer();
+		 
+		 glm.trigger("gl_ready");
+		 cb();
+		 
+		 console.log("GLM : program ready");
+		 
+		 //cb(null,glm);
+	     }).catch(function(error){
+		 console.log("Error downloading XD1 shader code " + error);
+		 //glm.message("Error while downloading XD1 shader code : "+error, { type : "danger"});
+		 
+	     });
+	 }
 	 
 	 glm.get_layer=function(lid){
 	     for(var l=0;l<glm.layers.length;l++)
@@ -859,6 +861,7 @@
 	 }
 	 
 	 glm.create_layer=function(image, lid){
+	     
 	     var pro = new Promise(function(oui, non){
 		 
 		 if(lid===undefined){
@@ -871,6 +874,7 @@
 		 
 		 if(lid<0 || lid>=glm.maxlayers){
 		     alert("["+lid+"]All four layers already active, please remove one before adding a new one.");
+		     console.log("No more layers available!");
 		     return non("No more layers available!");
 		 }
 		 
@@ -881,7 +885,6 @@
 		 }
 		 
 		 console.log("Creating new layer at position " + lid);
-
 		 
 		 
 		 var layer=new gl_image_layer(glm, lid);
@@ -997,7 +1000,7 @@
 
 	 var cuts_value=layer.cuts_value=[0,0];
 
-
+	 
 	 
 	 //    var slct=histo_tpl.get('selection');
 	 //    slct.ui_root.add_class("disabled");
@@ -1832,8 +1835,10 @@
 	 gls.webgl_start().then(function(){
 	     console.log("III");
 	     gls.glm=new gl_multilayer(gls);
-	     ok(gls);
-	     console.log("III");
+	     gls.glm.fetch_programs(function(){
+		 ok(gls);
+		 console.log("Got programs!");
+	     });
 	 }).catch(function(m){
 	     fail("webgl start : " + JSON.stringify(m));
 	 });

@@ -40,6 +40,10 @@ class session{
 		this.clients[c].send("system/broadcast", { msg : msg, data: data}, bin_data);
 	}
     }
+
+    toString(){
+	return "Session[" + this.id +", "+ this.address+", NC="+this.n_clients+"]"; 
+    }
 };
 
 class session_manager{
@@ -53,12 +57,12 @@ class session_manager{
 		var inactive=s.inactive_start;
 		if(inactive!==undefined){
 		    var delta = new Date() - inactive;
-		    console.log("Session Inactive  " + s.id + " remaining " + 0.001*(20000-delta));
+		    console.log("Session Inactive  " + s + " remaining " + 0.001*(20000-delta));
 		    //console.log("Delta is " + delta);
 		    if(delta > 20000)
 			delete sm.sessions[si];
 		}else{
-		    console.log("Session active:  " + s.id);
+		    console.log("Session active:  " + s);
 		}
 	    }
 	}, 5000);
@@ -84,10 +88,10 @@ class session_manager{
     release_client(cli){
 	var sid=cli.session.id;
 	var s=this.sessions[sid];
-	console.log("Releasing client " + cli.id + " from session " + sid );
+	console.log("Releasing client " + cli.id + " from session " + s );
 	if(s!==undefined){
 	    s.remove_client(cli);
-	    console.log("Removed "+ cli.id+ " Remains " + s.n_clients + " clients in session " + s.id);
+	    console.log("Removed "+ cli.id+ " Remains " + s.n_clients + " clients in session " + s);
 	    if(s.n_clients==0){
 		s.inactive_start=new Date();
 	    }
@@ -100,10 +104,10 @@ class session_manager{
 	
     }
 
-    broadcast(station,msg,data){
+    broadcast(station,msg,data, bin_data){
 	console.log("Broadcast " + msg + " : " + JSON.stringify(data));
 	var S=this.sessions;
-	for(var s in S) S[s].broadcast(station,msg,data);
+	for(var s in S) S[s].broadcast(station,msg,data,bin_data);
     }
     
 

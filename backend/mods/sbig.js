@@ -2,6 +2,7 @@
 
 var seo = arguments[0];
 var sbig = seo.require('./lib/sbig');
+var fits = seo.require('./lib/fits'); //('../../node_modules/node-fits/build/Release/fits');
 
 var ob_tpl = {
 
@@ -85,6 +86,11 @@ var ob_tpl = {
 };
 
 
+function image_reply(name, image, func){
+    return func( { width : image.width(), height: image.height()}, [{ name : name, data : image.get_data()}] );
+}
+
+
 class sbig_cam {
 
     constructor(){}
@@ -156,8 +162,8 @@ class sbig_driver{
 		});
 	    },
 	    use_camera : function(msg, reply){
-		var cid=msg.data.cam_id;
-		var cam=sbd.cams[cid];
+		let cid=msg.data.cam_id;
+		let cam=sbd.cams[cid];
 		if(cam===undefined)
 		    return reply({ error : "No such camera!"});
 		if(cam.uid===undefined){
@@ -269,6 +275,15 @@ class sbig_driver{
 	    get_ob_template : function(msg, reply){
 		reply(ob_tpl);
 	    },
+	    get_last_image : function(msg, reply){
+		var cam_id=msg.data.cam_id;
+		var cam=sbd.cams[cam_id];
+		var image=cam.dev.last_image;
+		if(image!==undefined){
+		    reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : cam.dev.last_image.get_data()}] );
+		}else
+		    reply({ error : "No image!"});
+	    },
 	    submit_ob : function(msg, reply){
 		var cam_id=msg.data.cam_id;
 		var cam=sbd.get_locked_cam(this, cam_id);
@@ -281,7 +296,44 @@ class sbig_driver{
 		sbd.take_image(cam_id, msg.data.ob, function(answer){
 		    var image=answer.image;
 		    console.log("Got image " + image.width());
-		    reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : image.get_data()}] );
+		    var idata=image.get_data();
+
+		    console.log("Got data ! Bytes="+idata.length);
+		    //var idata=cam.dev.last_image.get_data(); //image.get_data();
+
+		    console.log("Data check... " + idata[0] + ", " + idata[1]);
+		    
+		    console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
+		    
+
+		    seo.sm.broadcast("sbig","image",
+				     {
+					 uid : cam.uid, cid:
+					 cam_id,
+					 width : image.width(),
+					 height: image.height()
+				     },
+				     [{ name : "image", data : idata}]
+				    );
+		    
+		    var img=image; //cam.dev.last_image;
+		    console.log("Fits creation...");
+		    
+		    var fifi=new fits.file;
+		    console.log("Fits created");
+		    fifi.file_name="sbig"+cam_id+"_last.fits";
+		    
+		    console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
+		    
+		    fifi.write_image_hdu(img);
+
+
+		    
+		    console.log("EX DATA : L= " + idata.length );
+		    for(var i=0;i<20;i++)
+			console.log("Data " + i + " = " + idata[i] );
+		    reply({});
+		    //reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : idata}] );
 		});
 		
 	    }

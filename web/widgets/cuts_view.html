@@ -4,6 +4,9 @@
  .cmap {
      display : flex;
      flex-direction: column;
+     background: black;
+     margin-left: 1rem;
+     margin-right: 1rem;
  }
  .cmap > h1 {
      flex: 1 0 auto;
@@ -11,7 +14,7 @@
  }
  
  .cmap > svg {
-     flex: 0 1 auto;
+     flex: 1 1 auto;
      z-index: 2;
  }
 
@@ -146,7 +149,7 @@
 	 
 	 obj.colors.style.marginLeft="0px";//(bbox.left+margin.left+cut_pos[0])+"px";
 	 obj.colors.style.marginTop="0px";//(bbox.top+margin.top+20)+"px";
-	 obj.colors.style.width=(cut_pos[1]-cut_pos[0])+"px";
+	 //obj.colors.style.width=(cut_pos[1]-cut_pos[0])+"px";
 	 
 	 draw();
      }

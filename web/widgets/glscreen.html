@@ -6,10 +6,13 @@
 
 <style>
  .gls_top{
-     flex: 2 0 auto;
+     flex: 2 1 auto;
      display: flex;
      flex-direction: column;
-     width: 100%;
+     height: 80vh;
+     border: 1px solid #888;
+     background: black;
+
  }
  .glwindow{
      display: flex;
@@ -142,7 +145,7 @@
      
      constructor(_base_node){
 
-	 console.log("CONSTRUCTR");
+	 
 
 	 var base_node=this.base_node=_base_node;
 	 var gls=this;
@@ -201,14 +204,14 @@
 
 	 var ui=gls_widget.ui;
 	 
-	 console.log("CONSTRUCTR BEF " + ui);
+
 	 
 	 zt.bind(ui, zt_pan, function(e){
 	     //console.log("Pan D=" + JSON.stringify(e.detail));
 	     log("PAN");
 	     gls.trigger("pan", { type : e.detail.events[0].type, x : e.detail.events[0].x, y : e.detail.events[0].y} );
 	 }, false);
-	 console.log("CONSTRUCTR LAST");
+
 	 
 	 
 	 zt.bind(ui, zt_pan3, function(e){
@@ -295,7 +298,7 @@
 	 var gls=this;
 	 
 	 return new Promise(function(ok, fail){
-	     console.log("Canvas is: " + gls_widget.canvas);
+//	     console.log("Canvas is: " + gls_widget.canvas);
 	     var gl=gls.gl=gls_widget.canvas.getContext('experimental-webgl', {preserveDrawingBuffer: true});
 	     
 	     if(!gl)
@@ -362,7 +365,7 @@
 	 
 	 //    var layer_objects=glm.elements.layers;
 	 // var geo=glm.elements.geometry.elements;
-	 // var tr=glm.tr=geo.translation;
+	 // var tr=glm.tr=OAgeo.translation;
 	 // var zm=glm.zm=geo.zoom; 
 	// var ag=glm.ag=geo.rotation.elements.angle; 
 	 // var rc=glm.rc=geo.rotation.elements.center;
@@ -497,7 +500,7 @@
 	    glm.drawing_node.appendChild(glscreen.ui);*/
 	 
 	 glm.listen("view_update", function() {
-	     console.log("GLM view update size " + gls_widget.glwindow.clientWidth + " , " + gls_widget.glwindow.clientHeight);
+	     console.log("GLM view update: size " + gls_widget.glwindow.clientWidth + " , " + gls_widget.glwindow.clientHeight);
 	     glscreen.resize(gls_widget.glwindow.clientWidth, gls_widget.glwindow.clientHeight);
 	     gls_widget.canvas.focus();
 	     glm.render();
@@ -699,12 +702,18 @@
 	 });
 	 
 	 glm.render=function () {
-	     
+
 	     var nl; for(nl=0;nl<glm.layers.length;nl++) if(glm.layer_enabled[glm.layers[nl].id]) break;
 	     //console.log("GLM render nlayers="+glm.layers.length + " enabled " + nl);
-	     if(nl===glm.layers.length) return;
+	     if(nl===glm.layers.length){
+		 console.log("GLM: render: no layers to draw!");
+		 return;
+	     }
+
 	     
 	     var positionLocation = gl.getAttribLocation(glm.program, "vPosition");
+
+
 	     
 	     //console.log("GLM Render vp " + glm.drawing_node.clientWidth + " , " +  glm.drawing_node.clientHeight);
 	     //gl.viewport(0, 0, glm.drawing_node.clientWidth, glm.drawing_node.clientHeight);
@@ -714,6 +723,8 @@
 	     
 	     gl.clearColor(1.0, 1.0, 0.0, 1.0);
 	     gl.clear(gl.COLOR_BUFFER_BIT);
+
+
 	     
 	     ctx2d.clearRect(0,0,glm.canvas.clientWidth,glm.canvas.clientHeight);
 	     
@@ -721,16 +732,19 @@
 	     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 	     
 	     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+
 	     
-	     
-	     for(var l=0;l<glm.layers.length;l++)
+	     for(var l=0;l<glm.layers.length;l++){
+//		 console.log("Update layer geometry layer " + l + "/" + glm.layers.length );
 		 if(glm.layer_enabled[glm.layers[l].id]){
 		     if(glm.layers[l].update_geometry!==undefined)
 			 glm.layers[l].update_geometry();
 		     else
 			 console.log("Strange NO UPDATE GEO !");
 		 }
-	     
+	     }
+
 	 }
 	 
 	 glm.fullscreen=function(on){
@@ -763,15 +777,15 @@
 	     );
 	 }
 	 
-
+	 
 	 glm.fetch_programs=function(cb){
 	     //var glsl_loc="./"+server_root+"/xd1.glsl";
 	     var glsl_loc="lib/shaders/xd1.glsl";
-	     console.log("Downloading glsl [" + glsl_loc+"]" );
+	     //console.log("Downloading glsl [" + glsl_loc+"]" );
 	     
 	     xhr_query(glsl_loc).then(function(shader_src){
 		 
-		 console.log("GLM linking programs...");
+		 //console.log("GLM linking programs...");
 		 
 		 var texture = gl.createTexture();
 		 var cmap_texture = gl.createTexture();
@@ -884,12 +898,15 @@
 		     //glm.delete_layer(lid);
 		 }
 		 
-		 console.log("Creating new layer at position " + lid);
-		 
+		 //console.log("Creating new layer at position " + lid);
+
+		 //console.log("EX DATA : L= " + image.data.length );
+		 /* for(var i=0;i<20;i++)
+		    console.log("Data " + i + " = " + image.data[i] );*/
 		 
 		 var layer=new gl_image_layer(glm, lid);
 
-		 console.log("Creating DONE new layer at position " + lid);
+		 //console.log("Creating DONEA new layer at position " + lid);
 		 
 		 
 		 layer.listen("name_changed", function(n){
@@ -897,7 +914,8 @@
 		     //layer_ci[this.id].subtitle=n;
 		     //layer_ci[this.id].set_title("Layer "+this.id);
 		 });
-		 
+
+		 //console.log("Creating DONEB new layer at position " + lid);
 	    	 
 		 //layer.set_title(image.name);
 		 
@@ -912,11 +930,13 @@
 		 //layer.view_update_childs();
 		 
 		 glm.layers.push(layer);
+		 //console.log("Creating DONEC new layer at position " + lid);
 		 glm.layer_enabled[lid]=1;
+		 //console.log("Creating DONED new layer at position " + lid);
 		 //var le_loc=gl.getUniformLocation(glm.program, "u_layer_enabled");
 		 gl.uniform4iv(glm.le_loc, glm.layer_enabled);
 		 
-		 
+		 //console.log("Creating DONEE new layer at position " + lid);
 		 //layer_ci[lid].ui_root.remove_class("disabled");
 		 
 		 //glm.nlayers++;
@@ -925,7 +945,7 @@
 		 if(typeof image != 'undefined'){
 		     layer.setup_image(image);
 		 }
-		 console.log("Creating DONE new layer at position " + lid);
+		 //console.log("Creating DONEF new layer at position " + lid);
 		 glm.trigger("view_update");
 		 //layer.get('cmap').trigger("colormap_changed", layer.cmap);
 		 
@@ -1020,7 +1040,7 @@
 	     cuts_value=value;
 	     layer.p_values[0]=value[0];
 	     layer.p_values[1]=value[1];
-	     //console.log("Cuts changed to " + JSON.stringify(this.value));
+	     console.log("Cuts changed to " + JSON.stringify(this.value));
 	     update_pvalues();
 
 	     gls_widget.childs.cuts.update_cuts(layer.ext, value);
@@ -1453,7 +1473,7 @@
 	     var ih=image.dims[1];
 	     var idata=image.data;
 	     
-	     console.log("Setting up layer " + layer.id + "... Img is " + iw + ", " + ih + " bounds " + image.ext[0] + ", " + image.ext[1]);
+	     //console.log("Setting up layer " + layer.id + "... Img is " + iw + ", " + ih + " bounds " + image.ext[0] + ", " + image.ext[1]);
 
 	     layer.width=iw;
 	     layer.height=ih;
@@ -1831,13 +1851,13 @@
  
  gls_widget.start=function(){
      var p=new Promise(function(ok,fail){
-	 console.log("III");
+	 
 	 gls.webgl_start().then(function(){
-	     console.log("III");
+	 
 	     gls.glm=new gl_multilayer(gls);
 	     gls.glm.fetch_programs(function(){
 		 ok(gls);
-		 console.log("Got programs!");
+		 
 	     });
 	 }).catch(function(m){
 	     fail("webgl start : " + JSON.stringify(m));

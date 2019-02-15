@@ -1,5 +1,5 @@
 
-<script src="../utils.js"></script>
+<!-- <script src="../utils.js"></script> -->
 
 <script src="../../node_modules/numeric/numeric-1.2.6.min.js"></script>
 
@@ -64,7 +64,7 @@
 
 <div class="gls_top">
     <div class="cuts">
-	<x-widget data-class="cuts_view" name="cuts"></x-widget>
+	<x-widget data-class="widgets/cuts_view" name="cuts"></x-widget>
     </div>
     
     <div data-var="glwindow" class="glwindow">
@@ -780,7 +780,7 @@
 	 
 	 glm.fetch_programs=function(cb){
 	     //var glsl_loc="./"+server_root+"/xd1.glsl";
-	     var glsl_loc="lib/shaders/xd1.glsl";
+	     var glsl_loc="./xd1.glsl";
 	     //console.log("Downloading glsl [" + glsl_loc+"]" );
 	     
 	     xhr_query(glsl_loc).then(function(shader_src){

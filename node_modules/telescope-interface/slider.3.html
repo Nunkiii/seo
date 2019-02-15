@@ -1,0 +1,613 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1,   shrink-to-fit=no">
+<title>slider</title>
+<!-- <style>@import url("./slider.1.css")</style> -->
+<style>@import url("./node_modules/bootstrap/dist/css/bootstrap.css")</style>
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+<script src="./node_modules/popper.js/dist/umd/popper.min.js"></script>
+<script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+<body lang="en">
+
+  <main class="container-fluid row">
+   
+    <article class="col-lg-4">
+      <h3></h3>
+      
+
+      <section>
+
+	<h4>Coordinates</h4>
+
+	<div class="form-inline mb-2">
+
+	  <div class="col-lg">
+	    <div class="input-group">
+	      <input type="text" class="form-control" placeholder="Object...">
+	      <span class="input-group-btn">
+		<button class="btn btn-secondary" type="button">Search</button>
+	      </span>
+	    </div>
+	  </div>
+	</div>
+
+
+	
+	<div class="form-inline mb-2">
+	  <label for="dome" class="col-lg-2 col-form-label">Dome </label>
+	  <div class="col-lg">
+	    <div class="input-group">
+	      <input type="number" min="0" max="359" step="1" class="form-control" id="dome" name="dome" />
+	      <span class="input-group-addon">°</span>
+	      <label class="input-group-addon" for="domelink">
+		<input type="checkbox" id="domelink" name="domelink">
+		Link
+	      </label>
+	    </div>
+	  </div>	  
+	</div>
+	
+	<div class="form-inline mb-2">
+	  <label for="dome" class="col-lg-2 col-form-label">Dome </label>
+	  <div class="col-lg">
+	    <div class="input-group">
+	      <input type="number" min="0" max="359" step="1" class="form-control" id="dome" name="dome" />
+	      <span class="input-group-addon">°</span>
+	    </div>
+	  </div>	  
+	    <label class="col-lg-2" for="domelink">
+	      <input type="checkbox" id="domelink" name="domelink">
+	      Link
+	    </label>
+	</div>
+
+
+	
+	<div class="form-inline mb-2">
+	  
+	  <div class="col-lg has-success">
+	    <label class="sr-only" for="ra">Right Ascension</label>
+	    <div class="input-group"  title="Right Ascension">
+	      <span class="input-group-addon">&alpha;</span>
+	      <input type="text" class="form-control form-control-success" id="ra" value="+00 00 00.0">
+	    </div>
+	    <div class="form-control-feedback ">+00 00 00.0</div>
+	    <small class="form-text text-muted">Alt=40°, min=20°</small>
+	  </div>
+
+	  <div class="col-lg  has-danger">
+	    <label class="sr-only" for="de">Declination</label>
+	    <div class="input-group" title="Declination">
+	      <span class="input-group-addon">&delta;</span>
+	      <input type="text" class="form-control form-control-danger" id="de" value="+00 00 00.0">
+	    </div>
+	    <div class="form-control-feedback">+00 00 00.0</div>
+	    <small class="form-text text-muted">out of bounds</small>
+	  </div>
+
+	</div>
+
+
+
+	
+	<!-- <div class="form-inline mb-2"> -->
+
+	<!-- <label for="ra" class="sr-only">Right Ascension</label> -->
+	<!-- <div class="col-lg input-group"  title="Right Ascension"> -->
+	<!--   <span class="input-group-addon">&alpha;</span> -->
+	<!--   <input class="form-control" type="text" id="ra" value="+00 00 00.0"> -->
+	<!-- </div> -->
+
+	<!--   <label for="de" class="sr-only">Declination</label> -->
+	<!--   <div class="col-lg input-group"  title="Declination"> -->
+	<!-- 	<span class="input-group-addon">&delta;</span> -->
+	<!-- 	<input class="form-control" type="text" id="de" value="+00 00 00.0"> -->
+	<!--   </div> -->
+
+	
+	<!-- <label for="ofra" class="col-lg-1 col-form-label" title="Offset"> + </label> -->
+	<!-- <div class="col-lg-4 input-group" title="Offset"> -->
+	<!--   <input class="form-control" type="number" value="0" id="ofra"> -->
+	<!--   <span class="input-group-addon">''</span> -->
+	<!-- </div> -->
+	
+	<!-- </div> -->
+	
+	
+	<!-- <div class="form-group row"> -->
+
+	<!-- <label for="ofde" class="col-lg-1 col-form-label" title="Offset"> + </label> -->
+	<!-- <div class="col-lg-4 input-group" title="Offset"> -->
+	<!-- 	<input class="form-control" type="number" value="0" id="ofde"> -->
+	<!-- 	<span class="input-group-addon">''</span> -->
+	<!-- </div> -->
+
+	<!-- </div>     -->
+	
+	<div class="form-inline mb-2">
+
+	  <label for="epoch" class="sr-only">Epoch</label>
+	  <div class="col-lg input-group"   title="Epoch">
+	    <span class="input-group-addon">J</span>	
+	    <input class="form-control" type="number" id="epoch" value="2000.0" step="0.5">
+	  </div>
+
+
+	  <div class="btn-group col-lg">
+	    <button type="submit" class=" col-lg btn btn-primary">Move</button>
+	    <button type="submit" class=" col-lg btn btn-secondary">Stop</button>
+	  </div>
+
+	</div>    
+
+	
+	<div class="form-inline mb-2">
+	  
+	  <label for="focus" class="col-lg-2 col-form-label">Focus</label>
+	  <div class="col-lg input-group">
+	    <input class="form-control" type="number" id="focus" value="12345" min="1">
+	    <span class="input-group-addon">mm</span>
+	  </div>
+	  
+	  <label class="custom-control custom-checkbox col-lg-3" active>
+      	    <input type="checkbox" class="custom-control-input" checked>
+      	    <span class="custom-control-indicator"></span>
+      	    <span class="custom-control-description">Follow</span>
+	  </label>
+	  
+	</div>
+	
+
+
+	
+	<section>
+
+
+	  
+	  <!-- <h4>Dome</h4> -->
+	  
+	  <div class="form-inline  mb-2">
+
+	    <label for="domepos" class="col-lg-2 col-form-label">Dome</label>
+	    <div class="col-lg input-group">
+	      <input class="form-control" type="number" id="domepos" min="0" max="359" value="100">
+	      <span class="input-group-addon">°</span>
+	    </div>
+
+	    <label class="custom-control custom-checkbox col-lg-3" active>
+	      <input type="checkbox" class="custom-control-input" checked>
+	      <span class="custom-control-indicator"></span>
+	      <span class="custom-control-description">Lock</span>
+	    </label>      
+	    
+	  </div>
+
+	  
+	  <div class="form-inline mb-2">
+
+	    <label for="derot" class="col-lg-2 col-form-label">Derotator</label>
+	    <div class="col-lg input-group">
+	      <input class="form-control" type="number" id="derot" min="0" max="359" value="100">
+	      <span class="input-group-addon">°</span>
+	    </div>
+
+	    <label class="custom-control custom-checkbox col-lg-3" active>
+	      <input type="checkbox" class="custom-control-input" checked>
+	      <span class="custom-control-indicator"></span>
+	      <span class="custom-control-description">Auto</span>
+	    </label>      
+	    
+	  </div>
+
+	</section>
+
+
+	
+      </section>
+      
+    </article>
+
+
+    <article class="col-lg-4">
+      <h3></h3>
+
+      <section>
+	<h4>CCD</h4>
+
+	
+	<div class="form-group row">
+
+	  <label for="binning" class="col-lg-2 col-form-label">Binning</label>
+	  <div class="col-lg-3">
+	    <select class="custom-select form-control" id="binning">
+	      <option value="1">1×1</option>
+	      <option value="2">2×2</option>
+	      <option value="3">3×3</option>
+	    </select>
+	  </div>
+
+	  <label for="temperature" class="col-lg-2 col-form-label">Temp.</label>
+	  <div class="col-lg-5 input-group">
+	    <input class="form-control" type="number" id="temperature" value="-15" max="1">
+	    <span class="input-group-addon">°K</span>
+	  </div>
+          
+	</div>
+
+	<!-- <div class="form-group row"> -->
+
+	<!--   <div class="btn-group col-lg"> -->
+	<!-- 	<button type="submit" class=" col-lg-4 btn btn-secondary">Full frame</button> -->
+	<!-- 	<button type="submit" class=" col-lg-4 btn btn-secondary">Crop</button> -->
+	<!-- 	<button type="submit" class=" col-lg-4 btn btn-secondary">Custom</button> -->
+	<!--   </div> -->
+
+	<!-- </div> -->
+
+	
+	<!-- Nav tabs -->
+	<ul class="nav nav-tabs" role="tablist">
+	  <li class="nav-item">
+	    <a class="nav-link active" data-toggle="tab" href="#full" role="tab">Full</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#custom" role="tab">Custom</a>
+	  </li>
+	</ul>
+
+	<!-- Tab panes -->
+	<div class="tab-content"  style="height:120px">
+	  <div class="tab-pane active" id="full" role="tabpanel">
+	    <h5>Full frame</h5>
+	    
+	  </div>
+
+	  <div class="tab-pane" id="custom" role="tabpanel">
+
+	    <h5>Custom frame</h5>
+	    
+	    <div class="form-inline mb-2">
+
+	      <label for="xint" class="col-lg-1 col-form-label">X<sub>0</sub></label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="xint" value="123" max="1">
+		<span class="input-group-addon">px</span>
+	      </div>
+	      
+	      <label for="w" class="col-lg-2 col-form-label">Width</label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="w" value="123" max="1">
+		<span class="input-group-addon">px</span>
+	      </div>
+	      
+	    </div>
+	    
+	    <div class="form-inline mb-2">
+
+	      <label for="yint" class="col-lg-1 col-form-label">Y<sub>0</sub></label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="yint" value="123" min="0">
+		<span class="input-group-addon">px</span>
+	      </div>
+	      
+	      <label for="h" class="col-lg-2 col-form-label">Height</label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="h" value="123" min="2">
+		<span class="input-group-addon">px</span>
+	      </div>
+	      
+	    </div>
+	    
+	  </div>
+
+	</div>    
+
+	
+
+      </section>
+
+
+      <section>
+	<h4>Time</h4>
+
+	<script>
+	  const now      = new Date(); /// Time stamp to be used for file names, DATE-OBS and JD
+	  var dateobs  = now.toISOString().slice(0,-5).split("T").join(" ")  /// string
+	  console.log(dateobs)
+	</script>
+	
+	<time datetime="YYYY-MM-DDThh:mm:ssTZD"> UT 2017-06-01 01:19:00</time>
+	<time datetime="YYYY-MM-DDThh:mm:ssTZD"> LT 2017-06-01 01:19:00</time>
+	<time datetime="YYYY-MM-DDThh:mm:ssTZD"> ST 2017-06-01 01:19:00</time>
+
+	
+      </section>
+      
+
+    	<section class="joystick">
+    	  <h4>Joystick</h4>
+    
+    	    <div class="btn-group-vertical row" role="group">
+    	      <div class="btn-group">
+    		<button type="button" class=" col-lg-3 btn btn-secondary border-bottom-0 rounded-0"> ↖ </button>
+    		<button type="button" class=" col-lg-3 btn btn-secondary border-bottom-0">           ↑ </button>
+    		<button type="button" class=" col-lg-3 btn btn-secondary border-bottom-0 rounded-0"> ↗ </button>
+    	      </div>
+    	      <div class="btn-group">
+    		<button type="button" class=" col-lg-3 btn btn-secondary border-bottom-0 rounded-0"> ← </button>
+    		<button type="button" class=" col-lg-3 btn btn-secondary border-bottom-0">  </button>
+    		<button type="button" class=" col-lg-3 btn btn-secondary border-bottom-0 rounded-0"> → </button>
+    	      </div>
+    	      <div class="btn-group">
+    		<button type="button" class=" col-lg-3 btn btn-secondary rounded-0"> ↙ </button>
+    		<button type="button" class=" col-lg-3 btn btn-secondary">           ↓ </button>
+    		<button type="button" class=" col-lg-3 btn btn-secondary rounded-0"> ↘ </button>
+    	      </div>
+    	    </div>
+
+
+
+	  <div class="btn-group col-lg-2">
+	    <button type="submit" class=" col-lg btn btn-primary"><span class="glyphicons glyphicons-arrow-left"></span></button>
+	    <button type="submit" class=" col-lg btn btn-secondary">→</button>
+	  </div>
+
+	    
+    </article>
+
+
+
+    
+    <article class="col-lg-4">
+
+      
+      <h3></h3>
+
+
+      
+      <section>
+	
+	<h4>Object</h4>
+	
+	<div class="form-group row">
+
+	  <label for="name" class="col-lg-2 col-form-label">Name</label>
+	  <div class="col-lg">
+	    <input class="form-control" type="text" id="name" placeholder="object name">
+	  </div>
+
+	</div>
+
+	
+	<!-- Nav tabs -->
+	<ul class="nav nav-tabs" role="tablist">
+	  <li class="nav-item">
+	    <a class="nav-link active" data-toggle="tab" href="#science" role="tab">Science</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#bias" role="tab">Bias</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#dark" role="tab">Dark</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#flat" role="tab">Flat</a>
+	  </li>
+	</ul>
+
+	<!-- Tab panes -->
+	<div class="tab-content" style="height:100px" >
+
+	  <div class="tab-pane active" id="science" role="tabpanel">
+	    <h5>Science</h5>
+	    
+	    <div class="form-inline mb-2">
+	      
+	      <label for="filter" class="col-lg-2 col-form-label">Filter</label>
+	      <div class="col-lg">
+      		<select class="custom-select form-control" id="filter">
+      		  <option value="1">Free</option>
+      		  <option value="2">U</option>
+      		  <option value="3">B</option>
+      		  <option value="4">V</option>
+      		  <option value="5">R</option>
+      		  <option value="6">I</option>
+      		</select>
+	      </div>
+
+	      
+	      <label class="col-lg-2 col-form-label" for="exptime" >Expose</label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="exptime" value="120">
+		<span class="input-group-addon">s</span>
+	      </div>
+	      
+	    </div>
+
+
+
+	  </div>
+
+	  <div class="tab-pane" id="bias" role="tabpanel">
+	    <h5>Bias</h5>
+
+
+	  </div>
+
+	  <div class="tab-pane" id="dark" role="tabpanel">
+	    <h5>Dark</h5>
+
+
+	    <div class="form-inline mb-2">
+	      <label class="col-lg-2 col-form-label" for="exptime" >Expose</label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="exptime" value="120">
+		<span class="input-group-addon">s</span>
+	      </div>
+	      
+	    </div>
+
+	    
+	  </div>
+
+	  <div class="tab-pane" id="flat" role="tabpanel">
+	    <h5>Flat</h5>
+
+	    
+	    <div class="col-lg btn-group" data-toggle="buttons">
+      	      <label class="btn btn-secondary col-lg-2">
+      		<input type="radio" name="options" id="option1" autocomplete="off"> U
+      	      </label>
+      	      <label class="btn btn-secondary col-lg-2">
+      		<input type="radio" name="options" id="option2" autocomplete="off"> B
+      	      </label>
+      	      <label class="btn btn-secondary col-lg-2">
+      		<input type="radio" name="options" id="option3" autocomplete="off"> V
+      	      </label>
+      	      <label class="btn btn-secondary col-lg-2">
+      		<input type="radio" name="options" id="option4" autocomplete="off"> R
+      	      </label>
+      	      <label class="btn btn-secondary col-lg-2">
+      		<input type="radio" name="options" id="option5" autocomplete="off"> I
+      	      </label>
+      	      <label class="btn btn-primary col-lg active">
+      		<input type="radio" name="options" id="option6" autocomplete="off" checked > Free
+      	      </label>
+	    </div>
+
+
+
+	    <div class="form-inline mb-2">
+	      <label class="col-lg-2 col-form-label" for="exptime" >Expose</label>
+	      <div class="col-lg input-group">
+		<input class="form-control" type="number" id="exptime" value="120">
+		<span class="input-group-addon">s</span>
+	      </div>
+
+	      
+	      
+	    </div>
+	  </div>
+
+	  
+	  
+	  <div class="form-inline mb-2">      
+
+	    
+	    <label for="repeat" class="col-lg-2 col-form-label">Repeat</label>
+	    <div class="col-lg input-group">
+	      <input class="form-control" type="number" id="repeat" value="100" min="1">
+	      <span class="input-group-addon">×</span>
+	    </div>
+
+
+	  </div>
+
+
+
+	  
+	  <div class="form-group row">
+
+	    <div class="btn-group col-lg">
+	      <button type="submit" class=" col-lg-3 btn btn-primary">Launch</button>
+	      <button type="submit" class=" col-lg-3 btn btn-secondary">Video</button>
+	      <button type="submit" class=" col-lg-3 btn btn-secondary">Test</button>
+	      <button type="submit" class=" col-lg-3 btn btn-secondary">Abort</button>
+	    </div>
+	    
+	  </div>
+	  
+      </section>
+
+
+      
+    </article>
+
+    
+
+
+    
+
+    
+    <!-- <section class="ra-dec-coordinates"> -->
+
+    <!-- 	  <\!-- Tab panes -\-> -->
+    <!-- 	  <div> -->
+
+    <!-- 	    <div class="active" id="radec" role="tabpanel"> -->
+    <!-- 	      <h4>Equatorial coordinates</h4>	 -->
+
+    <!-- 	      <label for="">asd</label> -->
+    <!-- 	      <input list="browsers" name="browser"> -->
+    <!-- 	      <datalist id="browsers"> -->
+    <!-- 		<option value="Internet Explorer"> -->
+    <!-- 		<option value="Firefox"> -->
+    <!-- 		<option value="Chrome"> -->
+    <!-- 		<option value="Opera"> -->
+    <!-- 		<option value="Safari"> -->
+    <!-- 	      </datalist> -->
+    
+    <!-- 	    </div> -->
+
+    <!-- 	    <div  id="altaz" role="tabpanel"> -->
+    <!-- 	      <h4>Alt-azimuthal coordinates</h4> -->
+    
+    <!-- 	    </div> -->
+    <!-- 	    <div  id="lb" role="tabpanel"> -->
+    <!-- 	      <h4>Galactic coordinates</h4> -->
+    <!-- 	    </div> -->
+    <!-- 	    <div  id="preset" role="tabpanel"> -->
+    <!-- 	      <h4>Preset</h4> -->
+    <!-- 	    </div> -->
+
+    <!-- 	  </div> -->
+
+    
+    
+    <!-- 	</section> -->
+    
+
+
+    
+
+    <!-- 	  <div class="step"> -->
+    <!-- 	    <div> -->
+    <!-- 	      <span>arcsec</span> -->
+    <!-- 	      <input type="number"> -->
+    <!-- 	      <span> -->
+    <!-- 		<button>step</button> -->
+    <!-- 	      </span> -->
+    <!-- 	    </div> -->
+    <!-- 	  </div> -->
+
+    <!-- 	</section> -->
+    
+    <!--       </div> -->
+
+    
+    <!-- <figure> -->
+    
+    <!-- 	<figure> -->
+    <!-- 	  <img src="./png/1.png" alt=""> -->
+    <!-- 	  <figcaption>a</figcaption> -->
+    <!-- 	</figure> -->
+    
+    <!-- 	<figure> -->
+    <!-- 	  <img src="./png/2.png" alt=""> -->
+    <!-- 	  <figcaption>b</figcaption> -->
+    <!-- 	</figure> -->
+    
+    <!-- 	<figure> -->
+    <!-- 	  <img src="./png/3.png" alt=""> -->
+    <!-- 	  <figcaption>c</figcaption> -->
+    <!-- 	</figure> -->
+    
+    <!-- 	<figure> -->
+    <!-- 	  <img src="./png/4.png" alt=""> -->
+    <!-- 	  <figcaption>d</figcaption> -->
+    <!-- 	</figure> -->
+    
+    <!-- </figure> -->
+    
+  </main>

@@ -1,0 +1,27 @@
+{
+  "name": "seo",
+  "version": "1.0.0",
+  "description": "Node.js server, web interface",
+  "main": "backend/seo.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nunkiii/seo.git"
+  },
+  "author": "Pierre Sprimont",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nunkiii/seo/issues"
+  },
+  "homepage": "https://github.com/Nunkiii/seo#readme",
+  "dependencies": {
+    "fontawesome": "^5.6.3",
+    "glob": "^7.1.3",
+    "mongodb": "^3.1.13",
+    "numeric": "^1.2.6",
+    "telescope-interface": "github:vertighel/telescope-interface",
+    "ws_protocol_layer": "github:Nunkiii/ws_protocol_layer"
+  }
+}

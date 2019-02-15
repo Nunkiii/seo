@@ -1,0 +1,82 @@
+
+<!doctype html>
+<title>Telescope interface</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- bootstrap.css, jquery, popper, bootstrap.js -->
+<link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+<script src="./node_modules/popper.js/dist/umd/popper.min.js"></script>
+<script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<!-- Widget Engine -->
+<script src="./node_modules/widget_engine/lib/js/xhr.js"></script>
+<script src="./node_modules/widget_engine/lib/js/widget_engine.js"></script>
+
+<!-- d3 -->
+<script src="./node_modules/d3/dist/d3.min.js"></script>
+
+<!-- this -->
+<style>
+  /* Generated using sass --watch style.scss:style.css */
+  /* @import url("./style.css"); */
+</style>
+
+<body>
+
+<section class="row">
+
+  <form class="col-4">
+
+    <div class="">
+      <h4>Camera</h4>
+      <x-widget data-class="camera-ccd"></x-widget>
+    </div>
+    <div class="">
+      <h4>Object</h4>
+      <x-widget data-class="camera-object"></x-widget>
+    </div>
+    
+    <div class="">
+      <h4>Control</h4>
+      <x-widget data-class="camera-controls"></x-widget>
+    </div>
+    
+  </form>
+  
+  <div class="col-4">
+    <h4>Table test</h4>
+    <x-widget data-class="table"></x-widget>
+  </div>
+  
+  <!-- <div class="col-4"> -->
+  <!--   <h4>Horizontal line chart</h4> -->
+  <!--   <x-widget data-class="horizontal-cut"></x-widget> -->
+  <!-- </div> -->
+  
+  <!-- <div class="col-4"> -->
+  <!--   <h4>Vertical line chart</h4> -->
+  <!--   <x-widget data-class="vertical-cut"></x-widget> -->
+  <!-- </div> -->
+  
+  <div class="col-4">
+    <h4>Mini-graph</h4>
+    <x-widget data-class="simple-line"></x-widget>
+  </div>
+  
+</section>
+
+<!-- <script> -->
+  
+<!--       $("form").on("submit", function(e){ -->
+<!--           e.preventDefault(); -->
+<!--           var formData = $(this).serializeArray(); -->
+<!--           // var button = $('button[clicked="true"]') -->
+<!--           // formData.push({ name: button.prop("name"), value: button.prop("value") }) -->
+<!--           // console.log(button) -->
+<!--           console.log(formData) -->
+
+<!--       }); -->
+
+<!-- </script> -->

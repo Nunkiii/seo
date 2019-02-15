@@ -15,3 +15,7 @@ Node.js server, web interface
     
     cd backend/
     node ./seo.js
+
+The entry page of the web application is
+
+    seo/node_modules/telescope-interface/observatory.html

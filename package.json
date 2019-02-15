@@ -20,6 +20,6 @@
         "glob": "^7.1.3",
         "mongodb": "^3.1.13",
         "numeric": "^1.2.6",
-        "telescope-interface": "github:vertighel/telescope-interface",
+        "telescope-interface": "github:vertighel/telescope-interface"
     }
 }

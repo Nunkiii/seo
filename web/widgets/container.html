@@ -1,13 +1,21 @@
-<style>
- .contai{
-     flex: 1 1 auto;
-/*     overflow-y: scroll;
-     display: flex;
-     flex-direction: column; */
 
- }
+<style>
+
 </style>
-<div class="contai" data-var="cnt"></div>
+
+<div data-var="cnt">
+</div>
 
 <script class="builder">
+
+var cnt=this;
+
+this.clear=function(){
+    for(c in cnt.childs){
+        delete cnt.childs[c];
+    }
+    cnt.childs={};
+    $(cnt.cnt).html("");
+}
+
 </script>

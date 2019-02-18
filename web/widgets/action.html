@@ -1,115 +1,108 @@
+
 <style>
- .action{
-     flex: 1 1 auto;
-     display: flex;
-     flex-direction: row;
-     justify-content: space-between;
-     align-items: center;
-     align-content: center;
-     width: 100%;
- }
- .action > span{
-     flex: 0 1 auto;
-     padding-right: 1em;
-     padding-left: 1em;
- }
- 
- .action > button{
-     flex: 0 1 auto;
- }
- .spin{
-     color: springgreen;
-     font-size: 1.5em;
- }
+
 </style>
 
-<div data-var="div" class="action">
-    <span data-var="ci" class=""></span> <button data-var="b" type="button" class="btn btn-success">
-    </button>
+<div>
+
+  <button data-var="b" type="button" class="btn btn-primary">
+    Action
+  </button>
+
+  <output data-var="ci">
+    unknown
+  </output>
+
 </div>
 
-
 <script class="builder">
- var a=this;
 
- var button_handler;
+var a=this;
 
- a.b.disabled=true;
+var button_handler;
+
+a.b.disabled=true;
+
+$(this.b).on("click", function(){
+    if(button_handler!==undefined)
+	button_handler();
+});
  
- this.b.addEventListener("click", function(){
-     if(button_handler!==undefined)
-	 button_handler();
- });
+this.wait=function(cfg ){
+    $(a.ci).html("waiting...")
+        .removeClass()
+        .addClass("text-warning");
+    $(a.b).html("Waiting")
+        .removeClass()
+        .addClass("btn btn-warning");
 
+    if(cfg.message!==undefined)
+	$(a.ci).append(" "+cfg.message);
+    
+    if(cfg.button_message!==undefined){
+ 	$(a.b).prop("disabled",false);
+	$(a.b).append(" "+cfg.button_message);
+    }else{
+ 	$(a.b).prop("disabled",true);
+    }
+    
+    if(cfg.wait_cb!==undefined){
+ 	$(a.b).prop("disabled",false);
+	button_handler=cfg.wait_cb;
+    }else{
+ 	$(a.b).prop("disabled",true);
+    }
+}
 
- this.set_text=function(txt){
+this.start=function(cfg){
+    
+    if(cfg.message!==undefined)
+    $(a.ci).html(cfg.message)
+        .removeClass()
+        .addClass("text-success");
+    if(cfg.button_message!==undefined){
+ 	$(a.b).prop("disabled",false);
+	$(a.b).html(cfg.button_message)
+        .removeClass()
+        .addClass("btn btn-success");
+    }else{
+ 	$(a.b).prop("disabled",true);
+    }
+    
+    if(cfg.start_cb!==undefined){
+ 	$(a.b).prop("disabled",false);
+	button_handler=cfg.start_cb;
+    }else{
+ 	$(a.b).prop("disabled",true);
+    }
+    
+}
 
+this.error=function(cfg){
+    $(a.ci).html("error")
+        .removeClass()
+        .addClass("text-danger");
+    $(a.b).html("Error")
+        .removeClass()
+        .addClass("btn btn-danger");        
+    
+    if(cfg.message!==undefined)
+	$(a.ci).append(" "+cfg.message);
+    
+    if(cfg.button_message!==undefined){
+ 	$(a.b).prop("disabled",false);
+	$(a.b).append(" "+cfg.button_message);
+    }else{
+ 	$(a.b).prop("disabled",true);
+    }
+    
+    if(cfg.error_cb!==undefined){
+ 	$(a.b).prop("disabled",false);
+	button_handler=cfg.wait_cb;
+    }else{
+ 	$(a.b).prop("disabled",true);
+    }
+    
+}
 
- }
- 
- this.wait=function(cfg ){
-     a.ci.innerHTML="<i class=\"spin fas fa-cog fa-spin\"></i> ";
-     a.b.innerHTML="";
-     
-     if(cfg.message!==undefined)
-	 a.ci.innerHTML+=" "+cfg.message;
-     
-     if(cfg.button_message!==undefined){
- 	 a.b.style.display="";
-	 a.b.innerHTML+=" "+cfg.button_message;
-     }else{
-	 a.b.style.display="none";
-     }
-     
-     if(cfg.wait_cb!==undefined){
-	 a.b.disabled=false;
-	 button_handler=cfg.wait_cb;
-     }else{
-	 a.b.disabled=true;
-     }
- }
-
- this.start=function(cfg){
-     a.b.innerHTML="";
-     
-     if(cfg.message!==undefined)
-	 a.ci.innerHTML=cfg.message;
-     if(cfg.button_message!==undefined){
-	 a.b.style.display="";
-	 a.b.innerHTML=" "+cfg.button_message;
-     }else{
-	 a.b.style.display="none";
-     }
-     if(cfg.start_cb!==undefined){
-	 a.b.disabled=false;
-	 button_handler=cfg.start_cb;
-     }else{
-	 a.b.disabled=true;
-     }
-     
- }
-
- this.error=function(cfg){
-     a.ci.innerHTML="<i class=\"text-danger fa fa-cog fa-exclamation\"></i> ";
-     a.b.innerHTML="";
-	 
-     if(cfg.message!==undefined)
-	 a.ci.innerHTML+=" "+cfg.message;
-     
-     if(cfg.button_message!==undefined){
-	 a.b.style.display="";
-	 a.b.innerHTML+=" "+cfg.button_message;
-     }else{
-	 a.b.style.display="none";
-     }
-     
-     if(cfg.error_cb!==undefined){
-	 a.b.disabled=false;
-	 button_handler=cfg.wait_cb;
-     }else{
-	 a.b.disabled=true;
-     }
-     
- }
- 
 </script>

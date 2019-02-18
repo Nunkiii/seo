@@ -1,34 +1,34 @@
+
 <style>
- .console{
-     padding: .5em;
-     border: 1px solid tomato;
-     max-height: 10em;
-     font-size: .8em;
-     background-color: rgba(255,0,0,.2);
-     overflow-y: auto;
-     overflow-x: hidden;
-     max-width:100%;
-     flex: 2 1 auto;
- }
- 
- .console > div > pre {
-     color: white;
- }
+
+output[data-var="text"] {
+    display: block;
+    overflow-x: hidden;
+    word-break: break-all;
+    background-color: #333;
+    color: lightgreen;
+    height: 10em;
+    font-size: 0.7em;
+    font-family: "Monospace";
+}
+
+output[data-var="text"] pre {
+    color: cyan;    
+}
+
 </style>
 
-
-<div class="console" data-var="text"></div>
+<output data-var="text" class="navbar">
+</output>
 
 <script class="builder">
- var console=this;
+
+var console=this;
  
  console.newline=function(text){
-     var line=document.createElement("div");
-     var pre=document.createElement("pre");
-     line.appendChild(pre);
-     pre.innerHTML=text;
-     console.text.appendChild(line);
 
+     $(console.text).append("<p>"+text);
+     
      console.text.scrollTop = console.text.scrollHeight;
  }
  

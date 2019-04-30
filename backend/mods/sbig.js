@@ -1,8 +1,9 @@
 "use strict"
 
 var seo = arguments[0];
-var sbig = seo.require('./lib/sbig');
-var fits = seo.require('./lib/fits'); //('../../node_modules/node-fits/build/Release/fits');
+
+var fits = seo.require('../../node-sbig/node_modules/node-fits/build/Release/fits.node');
+var sbig = seo.require('../../node-sbig/build/Release/sbig.node');
 
 var ob_tpl = {
 

@@ -1,13 +1,13 @@
-#!/usr/bin/env nodejs
+#!/usr/bin/env node
 
 "use strict";
 
 const fs = require('fs');
 const http = require('http');
-const ws=require("./ws_protocol_layer/lib/common/ws.js");
-const ws_server=require("./ws_protocol_layer/lib/node/ws_server.js");
-
 const glob = require("glob");
+
+const ws=require("../node_modules/ws_protocol_layer/lib/common/ws.js");
+const ws_server=require("../node_modules/ws_protocol_layer/lib/node/ws_server.js");
 
 
 var config = {

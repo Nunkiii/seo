@@ -93,8 +93,11 @@
 
      new_socket(options){
 	 if(options===undefined) options={};
-	 if(options.path===undefined) options.path="ws";
-
+	 if(options.path===undefined) {
+             options.path="";
+             options.port=9999;
+         }
+         
 	 return this.ws_server.create_client(options);
      }
 

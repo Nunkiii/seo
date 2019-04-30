@@ -81,9 +81,39 @@ var ob_tpl = {
 		    }
 		}
 	    }
+	},
+
+	files : {
+	    name : "Files",
+	    objects : {
+
+	    }
+	    
 	}
     }
 };
+
+var file_tpl = {
+
+    name : "Astro Image",
+    
+    objects : {
+	
+	file_name : {
+	    name : "File",
+	    type: "string"
+	},
+	snap : {
+	    name : "Snapshot",
+	    type : "binary"
+	},
+	ob : {
+	    name : "Observation Block",
+	    type : "link"
+	}
+    }
+}
+
 
 
 function image_reply(name, image, func){
@@ -293,47 +323,85 @@ class sbig_driver{
 		}
 		console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
 
-		sbd.take_image(cam_id, msg.data.ob, function(answer){
-		    var image=answer.image;
-		    console.log("Got image " + image.width());
-		    var idata=image.get_data();
+		sbd.take_image(cam_id, msg.data.ob, function(expo_message){
+		    
+		    
+		    switch(expo_message.type){
+			
+		    case "expo_progress":
+			console.log("Expo progress " +  expo_message.content );
+			seo.sm.broadcast("sbig","expo_progress",
+					 {
+					     uid : cam.uid,
+					     cid: cam_id,
+					     progress : expo_message.content
+					 }
+					);
+			
+			break;
+		    case "grab_progress":
+			seo.sm.broadcast("sbig","grab_progress",
+					 {
+					     uid : cam.uid,
+					     cid: cam_id,
+					     progress : expo_message.content
+					 }
+					);
+			
+			break;
+			
+		    case "new_image":
+			var image=cam.dev.last_image; //expo_message.content;
 
-		    console.log("Got data ! Bytes="+idata.length);
-		    //var idata=cam.dev.last_image.get_data(); //image.get_data();
+			image.swapx();
+			
+			var idata=image.get_data();
+			
+			//console.log("Got data ! Bytes="+idata.length);
+			//var idata=cam.dev.last_image.get_data(); //image.get_data();
+			
+			console.log("Data check... " + idata[0] + ", " + idata[1]);
+			console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
+			
 
-		    console.log("Data check... " + idata[0] + ", " + idata[1]);
+			seo.sm.broadcast("sbig","image",
+					 {
+					     uid : cam.uid, cid: cam_id,
+					     width : image.width(),
+					     height: image.height()
+					 },
+					 [{ name : "image", data : idata}]
+					);
+			
+			//var img=image; //cam.dev.last_image;
+			//console.log("Fits creation...");
+			var date=new Date();
+			var fname ="NUNKI."+date.getUTCFullYear()+"-"+date.getUTCMonth()+"-"+date.getUTCDay()+"T"
+			    +date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
+			
+			
+			var fifi=new fits.file;
+			console.log("Writing FITS file ["+ fname +"]");
+			fifi.file_name="sbig"+cam_id+"_last.fits";
+			
+			console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
+			
+			fifi.write_image_hdu(image);
+			
+			
+			
+			// console.log("EX DATA : L= " + idata.length );
+			// for(var i=0;i<20;i++)
+			// 	console.log("Data " + i + " = " + idata[i] );
+			reply({});
+			//reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : idata}] );
+			
+			
+			break;
+		    default: break;
+		    }
 		    
-		    console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
 		    
-
-		    seo.sm.broadcast("sbig","image",
-				     {
-					 uid : cam.uid, cid:
-					 cam_id,
-					 width : image.width(),
-					 height: image.height()
-				     },
-				     [{ name : "image", data : idata}]
-				    );
-		    
-		    var img=image; //cam.dev.last_image;
-		    console.log("Fits creation...");
-		    
-		    var fifi=new fits.file;
-		    console.log("Fits created");
-		    fifi.file_name="sbig"+cam_id+"_last.fits";
-		    
-		    console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
-		    
-		    fifi.write_image_hdu(img);
-
-
-		    
-		    console.log("EX DATA : L= " + idata.length );
-		    for(var i=0;i<20;i++)
-			console.log("Data " + i + " = " + idata[i] );
-		    reply({});
-		    //reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : idata}] );
 		});
 		
 	    }
@@ -341,7 +409,7 @@ class sbig_driver{
     }
     
     set_cooling(cam_id, opts){
-
+	
 	var cam=this.cams[cam_id];
 	cam.dev.set_temp(opts.cooling_enabled, opts.cooling_setpoint); //Setting temperature regulation 
 	console.log("Cam cooling info = " + JSON.stringify(cam.get_temp()));
@@ -399,36 +467,39 @@ class sbig_driver{
 	}
 
 	console.log("Starting exposure " + JSON.stringify(cam_options, null, 4));
+
+	cam.dev.start_exposure(cam_options, cb);
+
 	
-	cam.dev.start_exposure(cam_options, function (expo_message){
+	// cam.dev.start_exposure(cam_options, function (expo_message){
 	    
-	    console.log("EXPO message : " + JSON.stringify(expo_message));
+	//     console.log("EXPO message : " + JSON.stringify(expo_message));
 	    
-	    if(expo_message.started){
-		console.log("Started !");
-		return console.log(expo_message.started);
-	    }
+	//     if(expo_message.started){
+	// 	console.log("Started !");
+	// 	return console.log(expo_message.started);
+	//     }
 	    
-	    if(expo_message.type=="new_image"){
-		//var img=expo_message.content;  BUG HERE!
-		console.log("NEW IMAGE !!");
-		var img=cam.dev.last_image; //tbr...
-		cb({ image : img });
-		//var idata=img.get_data();
+	//     if(expo_message.type=="new_image"){
+	// 	//var img=expo_message.content;  BUG HERE!
+	// 	console.log("NEW IMAGE !!");
+	// 	var img=cam.dev.last_image; //tbr...
+	// 	cb({ image : img });
+	// 	//var idata=img.get_data();
 		
 		
-		/*
-		var fifi=new fits.file;
-		var date=new Date();
+	// 	/*
+	// 	var fifi=new fits.file;
+	// 	var date=new Date();
 		
-		fifi.file_name=date.format() +".fits";
+	// 	fifi.file_name=date.format() +".fits";
 		
-		console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
+	// 	console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
 		
-		fifi.write_image_hdu(img);
-		*/
-	    }
-	});
+	// 	fifi.write_image_hdu(img);
+	// 	*/
+	//     }
+	// });
     }
     
     

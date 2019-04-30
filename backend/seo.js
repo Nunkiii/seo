@@ -105,7 +105,7 @@ class session_manager{
     }
 
     broadcast(station,msg,data, bin_data){
-	console.log("Broadcast " + msg + " : " + JSON.stringify(data));
+	//console.log("Broadcast " + msg + " : " + JSON.stringify(data));
 	var S=this.sessions;
 	for(var s in S) S[s].broadcast(station,msg,data,bin_data);
     }

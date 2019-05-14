@@ -88,12 +88,12 @@
 	 //this.ws_client=this.ws_server.create_client({path: "ws"});
 	 this.id_data={};
 	 this.browser = browser_info.init();
-
+	 this.socket_options={};
      }
 
      new_socket(options){
 	 if(options===undefined) options={};
-	 if(options.path===undefined) options.path="ws";
+	 if(options.path===undefined) options.path="";
 
 	 return this.ws_server.create_client(options);
      }
@@ -139,38 +139,48 @@
 
      start(){
 	 var so=this;
-	 so.open_socket( { mod_pack_name: "system", mod_pack : {
-	     broadcast : function(msg, reply){
-		 console.log("Broadcast message : " + JSON.stringify(msg.data));
-	     }
-	 }}).then(function(socket){
-	     so.socket=socket;
-	     so.load_identity();
-	     var ident_data={ browser : so.browser};
 
-	     if(so.id_data && so.id_data.session!==undefined)
-		 ident_data.session=so.id_data.session;
+	 return new Promise(function(ok, fail){
 
-	     socket.query("system/ident", ident_data, function(reply){
-		 so.id_data=reply.data;
-		 so.save_identity();
+	 
+	     so.socket_options.mod_pack_name="system";
+	     so.socket_options.mod_pack ={
+		 broadcast : function(msg, reply){
+		     console.log("Broadcast message : " + JSON.stringify(msg.data));
+		 }
+	     };
+	     
+	     console.log("SEO: start. socket options " + JSON.stringify(so.socket_options));
+	 
+	     so.open_socket(so.socket_options ).then(function(socket){
+		 so.socket=socket;
+		 so.load_identity();
+		 var ident_data={ browser : so.browser};
+		 
+		 if(so.id_data && so.id_data.session!==undefined)
+		     ident_data.session=so.id_data.session;
+		 
+		 socket.query("system/ident", ident_data, function(reply){
+		     so.id_data=reply.data;
+		     so.save_identity();
+		     ok();
+		 });
+		 
+		 socket.query("system/set_broadcast_stations", { monitor : true} , function(reply){
+		     console.log("set_bs reply : " + JSON.stringify(reply.data));
+		 });
+		 
+	     }).catch(function(e){
+		 fail("Websocket error " + e);
 	     });
-
-	     socket.query("system/set_broadcast_stations", { monitor : true} , function(reply){
-		 console.log("set_bs reply : " + JSON.stringify(reply.data));
-	     });
-
-	 }).catch(function(){
-	     console.log("Websocket error ");
 	 });
      }
-
  };
-
+     
  sys.maestro=new seo();
  window.sm=sys.maestro;
 
- sm.start();
+// sm.start();
 
  /*
   *  this.services={};

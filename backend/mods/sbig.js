@@ -2,6 +2,8 @@
 
 var seo = arguments[0];
 
+const EventEmitter = seo.require('events').EventEmitter
+
 var fits = seo.require('../../node-sbig/node_modules/node-fits/build/Release/fits.node');
 var sbig = seo.require('../../node-sbig/build/Release/sbig.node');
 
@@ -171,7 +173,9 @@ class sbig_driver{
     constructor(){
 	var sbd=this;
 	
-	this.usb_scan().catch(function(m){});
+	this.usb_scan().catch(function(m){
+
+	});
 	
 	this.mods={
 	    
@@ -309,11 +313,14 @@ class sbig_driver{
 	    get_last_image : function(msg, reply){
 		var cam_id=msg.data.cam_id;
 		var cam=sbd.cams[cam_id];
+		if(cam.dev!==undefined){
 		var image=cam.dev.last_image;
 		if(image!==undefined){
 		    reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : cam.dev.last_image.get_data()}] );
 		}else
 		    reply({ error : "No image!"});
+		}else
+		    reply({ error : "No dev!"});
 	    },
 	    submit_ob : function(msg, reply){
 		var cam_id=msg.data.cam_id;
@@ -322,10 +329,11 @@ class sbig_driver{
 		    return reply({ error : "Camera is in use"});
 		    
 		}
-		console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
+	//	console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
 
 		sbd.take_image(cam_id, msg.data.ob, function(expo_message){
-		    
+
+		    console.log("Expo message : " +  expo_message.type );
 		    
 		    switch(expo_message.type){
 			
@@ -341,6 +349,7 @@ class sbig_driver{
 			
 			break;
 		    case "grab_progress":
+			console.log("Grab progress " +  expo_message.content );
 			seo.sm.broadcast("sbig","grab_progress",
 					 {
 					     uid : cam.uid,
@@ -358,11 +367,11 @@ class sbig_driver{
 			
 			var idata=image.get_data();
 			
-			//console.log("Got data ! Bytes="+idata.length);
+			console.log("New image: Broadcasting to peers ! Bytes="+idata.length);
 			//var idata=cam.dev.last_image.get_data(); //image.get_data();
 			
-			console.log("Data check... " + idata[0] + ", " + idata[1]);
-			console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
+			//console.log("Data check... " + idata[0] + ", " + idata[1]);
+			//console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
 			
 
 			seo.sm.broadcast("sbig","image",
@@ -377,15 +386,15 @@ class sbig_driver{
 			//var img=image; //cam.dev.last_image;
 			//console.log("Fits creation...");
 			var date=new Date();
-			var fname ="NUNKI."+date.getUTCFullYear()+"-"+date.getUTCMonth()+"-"+date.getUTCDay()+"T"
+			var fname 
 			    +date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
 			
 			
 			var fifi=new fits.file;
-			console.log("Writing FITS file ["+ fname +"]");
-			fifi.file_name="sbig"+cam_id+"_last.fits";
+
+			fifi.file_name="NUNKI."+date.getUTCFullYear()+"-"+date.getUTCMonth()+"-"+date.getUTCDay()+"T";
 			
-			console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
+			console.log("New image captured,  w= " + image.width() + " h= " + image.height() + " , writing FITS file " + fifi.file_name );
 			
 			fifi.write_image_hdu(image);
 			
@@ -422,8 +431,8 @@ class sbig_driver{
 	var ccd_opts=opts.objects.ccd_settings.objects;
 	var obj_opts=opts.objects.object_settings.objects;
 
-	console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
-	console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
+	//console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
+	//console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
 	
 	var cam=this.cams[cam_id];
 	
@@ -449,7 +458,7 @@ class sbig_driver{
 	    cam_options.subframe = [sf.x0.value, sf.y0.value, sf.xf.value-sf.x0.value, sf.yf.value-sf.y0.value];
 	    break;
 	default: break;
-	};
+ 	};
 	
 	switch(obj_opts.imagetype){
 	case "science":
@@ -469,7 +478,24 @@ class sbig_driver{
 
 	console.log("Starting exposure " + JSON.stringify(cam_options, null, 4));
 
-	cam.dev.start_exposure(cam_options, cb);
+	const emitter = new EventEmitter();
+
+	emitter.on('grab', (pc) => {
+	    console.log('### GRAB ...' + pc);
+	})
+	emitter.on('data', (evt) => {
+	    console.log(evt);
+	})
+	
+	emitter.on('end', () => {
+	    console.log('### END ###')
+	})
+	
+	cam.dev.start_exposure(cam_options, cb).then(function(){
+	    console.log("Exposure Promise done !");
+	}).catch(function(e){
+	    console.error("Error SBIG " + e);
+	});
 
 	
 	// cam.dev.start_exposure(cam_options, function (expo_message){
@@ -520,29 +546,14 @@ class sbig_driver{
 
 	    
 	    
-	cam.dev.initialize(cam_id,function (init_message){
-	    
-	    console.log("CAM1 Init message : " + JSON.stringify(init_message));
-	    
-	    if(init_message.type=="success") {
-		init_message.ccd_info=cam.dev.ccd_info();
-		console.log(cam.name + " ready:\n" + JSON.stringify(init_message,null,5));
-		//console.log(init_message.content + " --> starting exposure.");
-		//take_image(cam,otions);
-		
-		// try{
-		// 	cam1.filter_wheel(1);
-		    // }
-		// catch( e){
-		// 	console.log("Cannot move any filterwheel " + e);
-		// }
-	    }
+	cam.dev.initialize(cam_id).then(function (init_message){
+	    //init_message.ccd_info=cam.dev.ccd_info();
+	    console.log(cam.name + " ready:\n" + JSON.stringify(init_message,null,5));
 	    if(init_message.type=="info") {
-	    };
-	    if(init_message.type=="error") {
-		//console.log(cam.name + " error : " + init_message.content );
 	    }
 	    cb(init_message);
+	}).catch(function(){
+	    console.log(cam.name + " error : " + init_message.content );
 	});
 	
     }

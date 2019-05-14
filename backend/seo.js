@@ -183,4 +183,9 @@ var http_server=http.createServer(
 );
 
 const SEO=new seo(http_server);
-http_server.listen(9999);
+
+var tcp_port=(process.argv.length>2)?process.argv[2]:9999
+
+console.log("SEO: listening on " + tcp_port);
+http_server.listen(tcp_port);
+

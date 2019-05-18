@@ -7,6 +7,8 @@ const EventEmitter = seo.require('events').EventEmitter
 var fits = seo.require('../../node-sbig/node_modules/node-fits/build/Release/fits.node');
 var sbig = seo.require('../../node-sbig/build/Release/sbig.node');
 
+var last_image_fname="";
+
 var ob_tpl = {
 
     name : "Observation Block",
@@ -316,7 +318,7 @@ class sbig_driver{
 		if(cam.dev!==undefined){
 		var image=cam.dev.last_image;
 		if(image!==undefined){
-		    reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : cam.dev.last_image.get_data()}] );
+		    reply({ width : image.width(), height: image.height()}, [{ name : last_image_fname, data : cam.dev.last_image.get_data()}] );
 		}else
 		    reply({ error : "No image!"});
 		}else
@@ -361,49 +363,58 @@ class sbig_driver{
 			break;
 			
 		    case "new_image":
-			var image=cam.dev.last_image; //expo_message.content;
+			var image=expo_message.content;
+//			    cam.dev.last_image; //
 
 			image.swapx();
 			
 			var idata=image.get_data();
 			
-			console.log("New image: Broadcasting to peers ! Bytes="+idata.length);
+			//console.log("New image: Broadcasting to peers ! Bytes="+idata.length);
 			//var idata=cam.dev.last_image.get_data(); //image.get_data();
 			
-			//console.log("Data check... " + idata[0] + ", " + idata[1]);
+			console.log("Data check... " + idata[0] + ", " + idata[1]);
 			//console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
-			
 
+			var date=new Date();
+			var fname="Nunki_Monitor";
+
+			if(cam.expo_mode=="exposure"){
+			    
+			    fname="NUNKI."+date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate()+"T"
+				+date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
+			    
+			    
+			    
+			    
+			    //var img=image; //cam.dev.last_image;
+			    //console.log("Fits creation...");
+			    
+			    var fifi=new fits.file;
+			    
+			    fifi.file_name=fname;
+			    
+			    console.log("New image captured,  w= " + image.width() + " h= " + image.height() + " , Date "  + date + " month " + date.getUTCMonth() + " : writing FITS file " + fifi.file_name );
+			    
+			    fifi.write_image_hdu(image);
+
+			}
+			last_image_fname=fname;
+			    
 			seo.sm.broadcast("sbig","image",
 					 {
 					     uid : cam.uid, cid: cam_id,
 					     width : image.width(),
 					     height: image.height()
 					 },
-					 [{ name : "image", data : idata}]
+					 [{date: date,  name : fname, data : idata}]
 					);
-			
-			//var img=image; //cam.dev.last_image;
-			//console.log("Fits creation...");
-			var date=new Date();
-			var fname 
-			    +date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
-			
-			
-			var fifi=new fits.file;
-
-			fifi.file_name="NUNKI."+date.getUTCFullYear()+"-"+date.getUTCMonth()+"-"+date.getUTCDay()+"T";
-			
-			console.log("New image captured,  w= " + image.width() + " h= " + image.height() + " , writing FITS file " + fifi.file_name );
-			
-			fifi.write_image_hdu(image);
-			
 			
 			
 			// console.log("EX DATA : L= " + idata.length );
 			// for(var i=0;i<20;i++)
 			// 	console.log("Data " + i + " = " + idata[i] );
-			reply({});
+			reply({ date: date, file_name : fname});
 			//reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : idata}] );
 			
 			
@@ -413,7 +424,19 @@ class sbig_driver{
 		    
 		    
 		});
+
 		
+	    },
+
+	    abort : function(msg, reply){
+		var cam_id=msg.data.cam_id;
+		var cam=sbd.get_locked_cam(this, cam_id);
+		if(cam===undefined){
+		    return reply({ error : "Camera is in use"});
+		    
+		}
+		cam.dev.stop_exposure();
+		reply({});
 	    }
 	}
     }
@@ -428,11 +451,14 @@ class sbig_driver{
     
     take_image(cam_id, opts, cb){
 
+	var expo_mode=this.expo_mode=opts.mode;
 	var ccd_opts=opts.objects.ccd_settings.objects;
 	var obj_opts=opts.objects.object_settings.objects;
 
 	//console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
 	//console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
+
+	console.log("Take Image " + expo_mode);
 	
 	var cam=this.cams[cam_id];
 	
@@ -442,8 +468,8 @@ class sbig_driver{
 	    
 	    exptime : obj_opts.exptime.value,
 	    nexpo : obj_opts.nexpo.value,
-	    fast_readout : false,
-	    dual_channel : false,
+	    fast_readout : true,
+	    dual_channel : true,
 	    //light_frame: true,
 	    readout_mode: ccd_opts.binning.value+"x"+ccd_opts.binning.value
 	};
@@ -478,25 +504,34 @@ class sbig_driver{
 
 	console.log("Starting exposure " + JSON.stringify(cam_options, null, 4));
 
-	const emitter = new EventEmitter();
+	// const emitter = new EventEmitter();
 
-	emitter.on('grab', (pc) => {
-	    console.log('### GRAB ...' + pc);
-	})
-	emitter.on('data', (evt) => {
-	    console.log(evt);
-	})
+	// emitter.on('grab', (pc) => {
+	//     console.log('### GRAB ...' + pc);
+	// })
+	// emitter.on('data', (evt) => {
+	//     console.log(evt);
+	// })
 	
-	emitter.on('end', () => {
-	    console.log('### END ###')
-	})
+	// emitter.on('end', () => {
+	//     console.log('### END ###')
+	// })
 	
-	cam.dev.start_exposure(cam_options, cb).then(function(){
-	    console.log("Exposure Promise done !");
-	}).catch(function(e){
-	    console.error("Error SBIG " + e);
-	});
-
+	if(expo_mode == "exposure"){
+	    cam.dev.start_exposure(cam_options, cb).then(function(msg){
+		console.log("Exposure Promise done ! " + JSON.stringify(msg));
+	    }).catch(function(e){
+		console.error("Exposure Error SBIG " + e);
+	    });
+	}else 	if(expo_mode == "monitor"){
+	    cam.dev.monitor(cam_options, cb).then(function(msg){
+		console.log("Monitor Promise done ! " + JSON.stringify(msg));
+	    }).catch(function(e){
+		console.error("Monitor Error SBIG " + e);
+	    });
+	}
+	
+	    
 	
 	// cam.dev.start_exposure(cam_options, function (expo_message){
 	    

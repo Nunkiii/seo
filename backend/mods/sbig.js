@@ -4,8 +4,8 @@ var seo = arguments[0];
 
 const EventEmitter = seo.require('events').EventEmitter
 
-var fits = seo.require('../../node-sbig/node_modules/node-fits/build/Release/fits.node');
-var sbig = seo.require('../../node-sbig/build/Release/sbig.node');
+var fits = seo.require('../node_modules/node-fits/build/Release/fits.node');
+var sbig = seo.require('../node_modules/node-sbig/build/Release/sbig.node');
 
 var last_image_fname="";
 

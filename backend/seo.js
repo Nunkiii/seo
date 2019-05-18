@@ -15,6 +15,7 @@ var config = {
 }
 
 class session{
+
     constructor(address){
 	this.address=address;
 	this.clients={};
@@ -22,6 +23,7 @@ class session{
 	this.id=Math.random().toString(36).substring(2);
 
     }
+
     add_client(cli){
 	this.clients[cli.id]=cli;
 	this.n_clients++;
@@ -29,11 +31,13 @@ class session{
 	if(this.inactive_start!==undefined)
 	    delete this.inactive_start;
     }
+
     remove_client(cli){
 	delete this.clients[cli.id];
 	this.n_clients--;
 	cli.session=undefined;
     }
+
     broadcast(station, msg,data, bin_data){
 	for(var c in this.clients){
 	    if(this.clients[c].stations[station]!==undefined)
@@ -110,7 +114,6 @@ class session_manager{
 	for(var s in S) S[s].broadcast(station,msg,data,bin_data);
     }
     
-
 };
 
 class seo extends ws_server.server{
@@ -188,4 +191,3 @@ var tcp_port=(process.argv.length>2)?process.argv[2]:9999
 
 console.log("SEO: listening on " + tcp_port);
 http_server.listen(tcp_port);
-

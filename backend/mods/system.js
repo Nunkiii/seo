@@ -3,8 +3,8 @@ class system{
 
 	this.web_clients={};
 	
-	
 	this.mods={
+
 	    ident : function (msg, reply){
 		
 		console.log("system: Ident rcv from client : " + JSON.stringify(msg.data));
@@ -15,6 +15,7 @@ class system{
 		if(reply!==undefined)
 		    reply(this.get_info());
 	    },
+
 	    set_broadcast_stations : function(msg, reply){
 		var opt=msg.data;
 		for (var o in opt){
@@ -26,12 +27,8 @@ class system{
 	    }
 	    
 	};
-
-	
 	
     }
 };
 
 return new system();
-
-

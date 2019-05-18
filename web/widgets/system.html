@@ -1,9 +1,8 @@
   <style>
 
-  x-ids{ display: none; }
+    x-ids{ display: none; }
   
   </style>
-
   
 <script class="builder">
 
@@ -11,10 +10,11 @@
 
  var sys=this;
 
-
  var browser_info = {
      options: [],
+
      header: [navigator.platform, navigator.userAgent, navigator.appVersion, navigator.vendor, window.opera],
+
      dataos: [
          { name: 'Windows Phone', value: 'Windows Phone', version: 'OS' },
          { name: 'Windows', value: 'Win', version: 'NT' },
@@ -28,6 +28,7 @@
          { name: 'Linux', value: 'Linux', version: 'rv' },
          { name: 'Palm', value: 'Palm', version: 'PalmOS' }
      ],
+
      databrowser: [
          { name: 'Chrome', value: 'Chrome', version: 'Chrome' },
          { name: 'Firefox', value: 'Firefox', version: 'Firefox' },
@@ -37,6 +38,7 @@
          { name: 'BlackBerry', value: 'CLDC', version: 'CLDC' },
          { name: 'Mozilla', value: 'Mozilla', version: 'Mozilla' }
      ],
+
      init: function () {
          var agent = this.header.join(' '),
              os = this.matchItem(agent, this.dataos),
@@ -44,6 +46,7 @@
 
          return { os: os, browser: browser };
      },
+
      matchItem: function (string, data) {
          var i = 0,
              j = 0,
@@ -57,11 +60,13 @@
          for (i = 0; i < data.length; i += 1) {
              regex = new RegExp(data[i].value, 'i');
              match = regex.test(string);
+
              if (match) {
                  regexv = new RegExp(data[i].version + '[- /:;]([\\d._]+)', 'i');
                  matches = string.match(regexv);
                  version = '';
                  if (matches) { if (matches[1]) { matches = matches[1]; } }
+
                  if (matches) {
                      matches = matches.split(/[._]+/);
                      for (j = 0; j < matches.length; j += 1) {
@@ -74,10 +79,12 @@
                  } else {
                      version = '0';
                  }
+
                  return {
                      name: data[i].name,
                      version: parseFloat(version)
                  };
+
              }
          }
          return { name: 'unknown', version: 0 };
@@ -122,13 +129,13 @@
 	     }
 	 });
      }
+
      close_socket(socket){
 	 if(socket===undefined) return false;
 	 if(socket.connected)
 	     socket.disconnect();
 	 return true;
      }
-
 
      load_identity(){
 	 var id_data=localStorage.getItem("ident");
@@ -148,7 +155,6 @@
 	 var so=this;
 
 	 return new Promise(function(ok, fail){
-
 	 
 	     so.socket_options.mod_pack_name="system";
 	     so.socket_options.mod_pack ={
@@ -180,6 +186,7 @@
 	     }).catch(function(e){
 		 fail("Websocket error " + e);
 	     });
+
 	 });
      }
  };

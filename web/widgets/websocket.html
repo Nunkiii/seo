@@ -34,12 +34,10 @@
       
   });
 
-
 this.attach_client=function( ws_client ){
 
-
     viewer.client=ws_client;
-    console.log("PPER " + viewer.client.peer);
+    console.log("PEER " + viewer.client.peer);
     url.value=viewer.client.peer.path;
 //    $(status).html(viewer.client.peer.url);
 

@@ -1,8 +1,6 @@
-# seo
+# seo: a node.js server and web interface to control a SBIG camera.
 
-Node.js server and web interface to control a SBIG camera.
-
-# Install node
+## Install node
 
 From:
 http://yoember.com/nodejs/the-best-way-to-install-node-js/
@@ -26,11 +24,11 @@ On Mac, add the following line in `.bash_profile`:
 source ~/.nvm/nvm.sh
 ```
 
-# Install dependecies needed by `node-fits` and `node-sbig`:
+## Install dependecies needed by `node-fits` and `node-sbig`:
     g++ libpng-dev libjpeg-dev libcfitsio-dev libusb-1.0-0-dev libsbigudrv-dev
 
 
-# Install this package
+## Install this package
 
     # Cloning and installing dependencies
     git clone https://github.com/Nunkiii/seo.git

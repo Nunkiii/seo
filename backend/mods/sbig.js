@@ -67,19 +67,19 @@ var ob_tpl = {
 		subframe : {
 		    name : "Subframe definition",
 		    objects : {
-			x0 : {
+			x_init : {
 			    name : "X0",
 			    type : "number"
 			},
-			y0 : {
+			y_init : {
 			    name : "Y0",
 			    type : "number"
 			},
-			xf : {
+			x_final : {
 			    name : "XF",
 			    type : "number"
 			},
-			yf : {
+			y_final : {
 			    name : "YF",
 			    type : "number"
 			}
@@ -198,6 +198,7 @@ class sbig_driver{
 		    reply({ error : m});
 		});
 	    },
+            
 	    use_camera : function(msg, reply){
 		let cid=msg.data.cam_id;
 		let cam=sbd.cams[cid];
@@ -248,6 +249,7 @@ class sbig_driver{
 
 
 	    },
+            
 	    release_camera : function(msg, reply){
 		var cid=msg.data.cam_id;
 		var cam=sbd.cams[cid];
@@ -278,6 +280,7 @@ class sbig_driver{
 		    reply({ error : "Camera not in use or you are not owner!"});
 
 	    },
+            
 	    get_cooling_info : function(msg, reply){
 		var cid=msg.data.cam_id;
 		if(cid===undefined) return reply({ error : "no cid"});
@@ -293,6 +296,7 @@ class sbig_driver{
 		    reply({error : e});
 		}
 	    },
+            
 	    set_cooling_info : function(msg, reply){
 		var cid=msg.data.cam_id;
 		if(cid===undefined) return reply({ error : "no cid"});
@@ -309,9 +313,11 @@ class sbig_driver{
 		}
 
 	    },
+            
 	    get_ob_template : function(msg, reply){
 		reply(ob_tpl);
 	    },
+            
 	    get_last_image : function(msg, reply){
 		var cam_id=msg.data.cam_id;
 		var cam=sbd.cams[cam_id];
@@ -332,6 +338,7 @@ class sbig_driver{
 		}else
 		    reply({ error : "No dev!"});
 	    },
+            
 	    submit_ob : function(msg, reply){
 		var cam_id=msg.data.cam_id;
 		var cam=sbd.get_locked_cam(this, cam_id);
@@ -469,8 +476,8 @@ class sbig_driver{
 	var ccd_opts=opts.objects.ccd_settings.objects;
 	var obj_opts=opts.objects.object_settings.objects;
 
-	//console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
-	//console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
+	// console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
+	// console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
 
 	console.log("Take Image " + expo_mode);
 
@@ -482,35 +489,38 @@ class sbig_driver{
 	    nexpo : obj_opts.nexpo.value,
 	    fast_readout : true,
 	    dual_channel : true,
-	    //light_frame: true,
 	    readout_mode: ccd_opts.binning.value+"x"+ccd_opts.binning.value
 	};
 
-	switch(opts.frametyp){
+	switch(ccd_opts.frametyp.value){
 	case "full":
+	    delete ccd_opts.subframe;
 	    break;
 	case "crop":
 	    break;
 	case "custom":
 	    var sf=ccd_opts.subframe.objects;
 	    cam_options.subframe = [
-                sf.x0.value,
-                sf.y0.value,
-                sf.xf.value - sf.x0.value,
-                sf.yf.value - sf.y0.value
+                sf.x_init.value, // nLeft
+                sf.y_init.value, // nTeft
+                sf.x_final.value - sf.x_init.value, // nWidth
+                sf.y_final.value - sf.y_init.value // nHeight
             ];
 	    break;
 	default: break;
  	};
 
-	switch(obj_opts.imagetype){
+	switch(obj_opts.imagetype.value){
 	case "science":
 	case "flat":
 	    cam_options.light_frame= true;
 	    break;
 	case "dark":
+	    cam_options.light_frame= false;
+            break;
 	case "bias":
 	    cam_options.light_frame= false;
+	    cam_options.exptime = 0;
 	    break;
 	default: break;
 	}

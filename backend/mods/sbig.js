@@ -10,42 +10,46 @@ var sbig = seo.require('../node_modules/node-sbig/build/Release/sbig.node');
 var last_image_fname="";
 
 var ob_tpl = {
-
+    
     name : "Observation Block",
-
+    
     objects : {
-
+	
 	object_settings : {
-
+	    
 	    objects : {
-
-	    imagetype : {
-		name : "Image type",
-		type: "string"
-	    },
-
-            exptime : {
-		name : "Exposure time",
-		type : "number"
-	    },
-
-	    nexpo : {
-		name : "Number of exposures",
-		type : "number"
-	    },
-
-	    filter : {
-		name : "Filter name",
-		type: "string"
-	    },
-
-	    object : {
-		name : "Target object description",
-		type: "string"
-	    }
+		
+		imagetype : {
+		    name : "Image type",
+		    type: "string"
+		},
+		
+		exptime : {
+		    name : "Exposure time",
+		    type : "number"
+		},
+		
+		nexpo : {
+		    name : "Number of exposures",
+		    type : "number"
+		},
+		
+		filter : {
+		    name : "Filter name",
+		    type: "string"
+		},
+		
+		object : {
+		    name : "Target object description",
+		    type: "string"
+		},
+		observer : {
+		    name : "Observer name",
+		    type: "string"
+		}
 	    }
 	},
-
+	
 	ccd_settings : {
 	    objects : {
 		cooling_enabled: {
@@ -206,7 +210,7 @@ class sbig_driver{
 		    return reply({ error : "No such camera!"});
 		if(cam.uid===undefined){
 		    cam.uid=this.session.id;
-		    console.log("Cam locked by " + cam.uid);
+//		    console.log("Cam locked by " + cam.uid);
 		    seo.sm.broadcast("sbig","locked", { uid : cam.uid, cid: cid});
 		    for(var p in cam) console.log("Cam prop " + p);
 
@@ -388,14 +392,16 @@ class sbig_driver{
 			//console.log("New image: Broadcasting to peers ! Bytes="+idata.length);
 			//var idata=cam.dev.last_image.get_data(); //image.get_data();
 
-			console.log("Data check... " + idata[0] + ", " + idata[1]);
+			console.log("New image received : Data check... " + idata[0] + ", " + idata[1] + " Expo mode " + cam.mode);
 			//console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
 
 			var date=new Date();
 			var fname="Nunki_Monitor";
 
-			if(cam.expo_mode=="exposure"){
+			
 
+			if(cam.mode=="exposure"){
+			    
 			    // fname="NUNKI."+date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate()+"T"
 			    //     +date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
 
@@ -404,16 +410,54 @@ class sbig_driver{
 			    //var img=image; //cam.dev.last_image;
 			    //console.log("Fits creation...");
 
+			    
 			    var fifi=new fits.file;
-
+			    
 			    fifi.file_name=fname;
 
+			    console.log("Writing FITS file, size="+image.width()+ "x" + image.height() + " : File " + fifi.file_name );
+			    
+			    
+			    
 			    fifi.write_image_hdu(image);
 
-			    console.log("New image captured, size="+image.width()+ "x" + image.height() + " : File " + fifi.file_name );
+			    //console.log("OB DATA [[" + JSON.stringify(msg.data.ob) + "]]");
+			    var fits_keys=[];
+			    function write_ob_key(key, obdata, path){
+				//console.log("write key [" + key + "] -> " +  key.toUpperCase() );
+				fits_keys.push({
+				    key: key.toUpperCase(),
+				    value: obdata.type=="number" ? (obdata.value*1.0) : obdata.value,
+				    comment: obdata.name
+				});
+			    }
+			    
+			    function parse_ob(obdata,key){
+				//console.log("Parse " + key + " : "  + obdata.name + " objects is " + obdata.objects);
+				if(obdata.objects!==undefined){
 
+				    for(var key in obdata.objects){
+					//console.log("Recurse parse " + key);
+					parse_ob(obdata.objects[key],key);
+				    }					
+				    
+				}
+				if(obdata.value!==undefined)
+				    write_ob_key(key, obdata);									
+			    }
+
+			    var obdata=msg.data.ob; //JSON.parse(msg.data.ob);
+			    parse_ob(obdata, "root");
+			    
+			    //console.log("Writing keys " + JSON.stringify(fits_keys));
+			    
+			    fifi.set_header_key(fits_keys, function(){
+				//console.log("Done writing keys !");
+			    });
+			    
+			    
 			}
-
+			
 			last_image_fname=fname;
 
 			seo.sm.broadcast("sbig","image",
@@ -479,12 +523,15 @@ class sbig_driver{
 	// console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
 	// console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
 
-	console.log("Take Image " + expo_mode);
+
 
 	var cam=this.cams[cam_id];
+	cam.mode=expo_mode;
+
+	console.log("CAM["+cam_id+"] Take Image MODE : " + cam.mode);
 
 	var cam_options = {
-
+	    expo_mode: opts.mode,
 	    exptime : obj_opts.exptime.value,
 	    nexpo : obj_opts.nexpo.value,
 	    fast_readout : true,

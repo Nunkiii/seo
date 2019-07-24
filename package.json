@@ -21,6 +21,7 @@
         "mongodb": "^3.1.13",
         "node-sbig": "github:Nunkiii/node-sbig",
         "numeric": "^1.2.6",
+        "ws_protocol_layer": "github:Nunkiii/ws_protocol_layer",
         "telescope-interface": "github:vertighel/telescope-interface"
     }
 }

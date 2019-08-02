@@ -352,6 +352,9 @@ class sbig_driver{
 		}
 	//	console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
 
+		var date=new Date();
+		var cooling_info=cam.dev.get_temp();
+		
 		sbd.take_image(cam_id, msg.data.ob, function(expo_message){
 
 		    console.log("Expo message : " +  expo_message.type );
@@ -395,7 +398,7 @@ class sbig_driver{
 			console.log("New image received : Data check... " + idata[0] + ", " + idata[1] + " Expo mode " + cam.mode);
 			//console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
 
-			var date=new Date();
+			
 			var fname="Nunki_Monitor";
 
 			
@@ -405,7 +408,8 @@ class sbig_driver{
 			    // fname="NUNKI."+date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate()+"T"
 			    //     +date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
 
-			    fname="NUNKI."+date.toISOString().slice(0,-5)+".fits";
+			    var date_end = new Date();
+			    fname="NUNKI."+date_end.toISOString()+".fits";
 
 			    //var img=image; //cam.dev.last_image;
 			    //console.log("Fits creation...");
@@ -450,7 +454,26 @@ class sbig_driver{
 			    parse_ob(obdata, "root");
 			    
 			    //console.log("Writing keys " + JSON.stringify(fits_keys));
+			    fits_keys.push({
+				key: "DATE-OBS",
+				value: date.toISOString(), 
+				comment: "Observation start time"
+			    });
+
+			    //var cooling_info=cam.dev.get_temp();
 			    
+			    fits_keys.push({
+				key: "CCDTEMP",
+				value: Math.floor(cooling_info.ccd_temp*100.0)/100.0, 
+				comment: "CCD temperature at the end of exposure"
+			    });
+			    var obj_opts=obdata.objects.object_settings.objects;
+			    if(	obj_opts.filter.value!=undefined)
+			    	fits_keys.push({
+				    key: "FILTER",
+				    value: obj_opts.filter.value, 
+				    comment: "Filter"
+				});
 			    fifi.set_header_key(fits_keys, function(){
 				//console.log("Done writing keys !");
 			    });
@@ -539,6 +562,24 @@ class sbig_driver{
 	    readout_mode: ccd_opts.binning.value+"x"+ccd_opts.binning.value
 	};
 
+	if(obj_opts.filter.value!=undefined){
+
+	    var filters = { // Filters configuration
+		U : 1,
+		B : 2,
+		V : 3,
+		R : 4,
+		I : 5
+	    }
+	    
+	    try{
+		cam.dev.filter_wheel( filters[obj_opts.filter.value]);
+	    }
+	    catch( e){
+		console.log("Sorry, Cannot move any filter wheel " + e);
+	    }
+	}
+	
 	switch(ccd_opts.frametyp.value){
 	case "full":
 	    delete ccd_opts.subframe;

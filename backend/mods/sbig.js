@@ -15,11 +15,10 @@ var ob_tpl = {
     
     objects : {
 	
-	object_settings : {
-	    
+	object_settings : {	    
 	    objects : {
 		
-		imagetype : {
+		imagetyp : {
 		    name : "Image type",
 		    type: "string"
 		},
@@ -467,13 +466,23 @@ class sbig_driver{
 				value: Math.floor(cooling_info.ccd_temp*100.0)/100.0, 
 				comment: "CCD temperature at the end of exposure"
 			    });
+                            
 			    var obj_opts=obdata.objects.object_settings.objects;
-			    if(	obj_opts.filter.value!=undefined)
+			    if(	obj_opts.filter.value!=undefined ||
+                                obj_opts.imagetyp.value!="bias" ||
+                                obj_opts.imagetyp.value !="dark" )
 			    	fits_keys.push({
 				    key: "FILTER",
 				    value: obj_opts.filter.value, 
 				    comment: "Filter"
 				});
+                            
+			    fits_keys.push({
+				key: "IMAGETYP",
+				value: obj_opts.imagetyp.value.toUpperCase(),
+				comment: "Image type"
+			    });
+                            
 			    fifi.set_header_key(fits_keys, function(){
 				//console.log("Done writing keys !");
 			    });
@@ -598,7 +607,7 @@ class sbig_driver{
 	default: break;
  	};
 
-	switch(obj_opts.imagetype.value){
+	switch(obj_opts.imagetyp.value){
 	case "science":
 	case "flat":
 	    cam_options.light_frame= true;

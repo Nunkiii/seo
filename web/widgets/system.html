@@ -98,7 +98,7 @@
      constructor(){
 	 super();
 	 this.ws_server= new ws_web.server();
-	 //this.ws_client=this.ws_server.create_client({path: "ws"});
+	 // this.ws_client=this.ws_server.create_client({path: "ws"});
 	 this.id_data={};
 	 this.browser = browser_info.init();
 	 this.socket_options={};
@@ -107,7 +107,7 @@
      new_socket(options){
 	 if(options===undefined) options={};
 	 if(options.path===undefined) options.path="";
-	 //if(options.port===undefined) options.port=9999;
+	 if(options.port===undefined) options.port=9999;
 
 	 return this.ws_server.create_client(options);
      }

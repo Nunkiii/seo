@@ -289,7 +289,7 @@ class sbig_driver{
 		if(cid===undefined) return reply({ error : "no cid"});
 		var cam=sbd.cams[cid];
 		if(cam===undefined) return reply({ error : "no cam"});
-		if(cam.dev===undefined)return reply({ error : "dev not open"});
+		if(cam.dev===undefined) return reply({ error : "dev not open"});
 
 		try{
 		    var cooling_info=cam.dev.get_temp();
@@ -309,7 +309,7 @@ class sbig_driver{
 
 		try{
 		    console.log("setting cooling info " + JSON.stringify(msg.data.cooling_info));
-		    cam.dev.set_temp(msg.data.cooling_info.enabled,msg.data.cooling_info.setpoint);
+		    cam.dev.set_temp(msg.data.cooling_info.enabled, msg.data.cooling_info.setpoint);
 		    reply({});
 		}catch(e){
 		    reply({error : e.toString()});
@@ -468,19 +468,21 @@ class sbig_driver{
 			    });
                             
 			    var obj_opts=obdata.objects.object_settings.objects;
-			    if(	obj_opts.filter.value!=undefined ||
-                                obj_opts.imagetyp.value!="bias" ||
-                                obj_opts.imagetyp.value !="dark" )
+			    if(	obj_opts.filter.value != undefined &&
+                                ( obj_opts.imagetyp.value != "bias" &&
+                                  obj_opts.imagetyp.value !="dark" )
+                              ){
 			    	fits_keys.push({
 				    key: "FILTER",
 				    value: obj_opts.filter.value, 
 				    comment: "Filter"
 				});
+                            }
                             
 			    fits_keys.push({
-				key: "IMAGETYP",
-				value: obj_opts.imagetyp.value.toUpperCase(),
-				comment: "Image type"
+			        key: "IMAGETYP",
+			        value: obj_opts.imagetyp.value.toUpperCase(),
+			        comment: "Image type"
 			    });
                             
 			    fifi.set_header_key(fits_keys, function(){
@@ -522,7 +524,6 @@ class sbig_driver{
 
 		});
 
-
 	    },
 
 	    abort : function(msg, reply){
@@ -535,7 +536,7 @@ class sbig_driver{
 		cam.dev.stop_exposure();
 		reply({});
 	    }
-	}
+	};
     }
 
     set_cooling(cam_id, opts){
@@ -555,8 +556,6 @@ class sbig_driver{
 	// console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
 	// console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
 
-
-
 	var cam=this.cams[cam_id];
 	cam.mode=expo_mode;
 
@@ -564,14 +563,18 @@ class sbig_driver{
 
 	var cam_options = {
 	    expo_mode: opts.mode,
-	    exptime : obj_opts.exptime.value,
+	    exptime : obj_opts.imagetyp.value=="bias" ? 0 : obj_opts.exptime.value,
 	    nexpo : obj_opts.nexpo.value,
 	    fast_readout : true,
 	    dual_channel : true,
 	    readout_mode: ccd_opts.binning.value+"x"+ccd_opts.binning.value
 	};
 
-	if(obj_opts.filter.value!=undefined){
+        
+	if(	obj_opts.filter.value != undefined &&
+                ( obj_opts.imagetyp.value != "bias" &&
+                  obj_opts.imagetyp.value !="dark" )
+          ){
 
 	    var filters = { // Filters configuration
 		U : 1,
@@ -579,7 +582,7 @@ class sbig_driver{
 		V : 3,
 		R : 4,
 		I : 5
-	    }
+	    };
 	    
 	    try{
 		cam.dev.filter_wheel( filters[obj_opts.filter.value]);
@@ -589,6 +592,21 @@ class sbig_driver{
 	    }
 	}
 	
+	switch(obj_opts.imagetyp.value){
+	case "science":
+	case "flat":
+	    cam_options.light_frame= true;
+	    break;
+	case "dark":
+	    cam_options.light_frame= false;
+            break;
+	case "bias":
+	    cam_options.light_frame= false;
+	    cam_options.exptime = 0;
+	    break;
+	default: break;
+	}
+        
 	switch(ccd_opts.frametyp.value){
 	case "full":
 	    delete ccd_opts.subframe;
@@ -606,21 +624,6 @@ class sbig_driver{
 	    break;
 	default: break;
  	};
-
-	switch(obj_opts.imagetyp.value){
-	case "science":
-	case "flat":
-	    cam_options.light_frame= true;
-	    break;
-	case "dark":
-	    cam_options.light_frame= false;
-            break;
-	case "bias":
-	    cam_options.light_frame= false;
-	    cam_options.exptime = 0;
-	    break;
-	default: break;
-	}
 
 	console.log("Starting exposure " + JSON.stringify(cam_options, null, 4));
 

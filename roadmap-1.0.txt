@@ -1,0 +1,25 @@
+- Added default port 9999.
+  /home/indy/git/telescopio/seo/web/widgets/system.html:110
+  Works on my laptop from scratch and on OARPAF pc. Both use apache2 with userdir mod.
+
+OK  Setting the temperature to -10,0 (beware the locales of the browser for decimal comma.)
+    and I check the box. temperature starts descending.
+OK  I uncheck the box. Temperature start rising.
+OK  I check the box again. Temperature restart descending.
+NO  Temperature goes until -2,0 and keep descending. I decide to put it to -0,5.
+    Temperature still descends. I try to set it with the input type number arrows or by
+    focus and unfocus. No effect.
+OK? Workaround: I uncheck and check the box: Temperature start descending and starts oscillating between -0.3 and -0,7.
+
+OK  If I stop and restart the ws server while the fan is on, the last temperature setpoint is recorded.
+
+NO  After first exposure, either with setpoint on or off, the fan stops.
+CHK Fan restarts only during the exposure, after the reconnection with the Release/Use Camera button.  
+NO  If I stop the ws server while the fan is stopped, the temperature starts rising, eventually the "hot" led switches on. 
+NO  After first exposure, the plot monitor stops.
+
+CHK Sometimes, starting exposure with no filter set and dark mode causes the header to be incomplete.
+CHK Apparently, temperature can decrease also with ws server on and fan off. 
+
+NO  Filter wheel in interface has no default.
+NO  Filter wheel does not store last position and always goes until position zero before setting the filter

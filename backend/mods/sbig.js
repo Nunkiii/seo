@@ -166,8 +166,6 @@ class sbig_driver{
 		    sbd.cams[cam.id]=cam;
 		    sbd.cams[cam.id].uid=undefined;
 
-
-
 		});
 		ok(sbd.cams);
 	    });
@@ -209,7 +207,7 @@ class sbig_driver{
 		    return reply({ error : "No such camera!"});
 		if(cam.uid===undefined){
 		    cam.uid=this.session.id;
-//		    console.log("Cam locked by " + cam.uid);
+
 		    seo.sm.broadcast("sbig","locked", { uid : cam.uid, cid: cid});
 		    for(var p in cam) console.log("Cam prop " + p);
 
@@ -249,7 +247,6 @@ class sbig_driver{
 
 		}else
 		    reply({ error : "Camera is in use!"});
-
 
 	    },
             
@@ -293,7 +290,7 @@ class sbig_driver{
 
 		try{
 		    var cooling_info=cam.dev.get_temp();
-		    //console.log("Getting cooling info " + JSON.stringify(cooling_info));
+
 		    reply(cooling_info);
 		}catch(e){
 		    reply({error : e});
@@ -349,7 +346,6 @@ class sbig_driver{
 		    return reply({ error : "Camera is in use"});
 
 		}
-	//	console.log("Ok, we are owner of cam " + cam.name +" Executing OB " + JSON.stringify(msg.data.ob, null, 10));
 
 		var date=new Date();
 		var cooling_info=cam.dev.get_temp();
@@ -385,34 +381,19 @@ class sbig_driver{
 
 		    case "new_image":
 			var image=expo_message.content;
-//			    cam.dev.last_image; //
 
 			image.swapx();
 
 			var idata=image.get_data();
 
-			//console.log("New image: Broadcasting to peers ! Bytes="+idata.length);
-			//var idata=cam.dev.last_image.get_data(); //image.get_data();
-
 			console.log("New image received : Data check... " + idata[0] + ", " + idata[1] + " Expo mode " + cam.mode);
-			//console.log("Data check... UINT " + idata.readInt16LE(0) + ", " +  idata.readInt16LE(2));
-
 			
 			var fname="Nunki_Monitor";
 
-			
-
 			if(cam.mode=="exposure"){
 			    
-			    // fname="NUNKI."+date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate()+"T"
-			    //     +date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()+"."+date.getUTCMilliseconds()+".fits";
-
 			    var date_end = new Date();
 			    fname="NUNKI."+date_end.toISOString()+".fits";
-
-			    //var img=image; //cam.dev.last_image;
-			    //console.log("Fits creation...");
-
 			    
 			    var fifi=new fits.file;
 			    
@@ -420,14 +401,11 @@ class sbig_driver{
 
 			    console.log("Writing FITS file, size="+image.width()+ "x" + image.height() + " : File " + fifi.file_name );
 			    
-			    
-			    
 			    fifi.write_image_hdu(image);
 
-			    //console.log("OB DATA [[" + JSON.stringify(msg.data.ob) + "]]");
 			    var fits_keys=[];
 			    function write_ob_key(key, obdata, path){
-				//console.log("write key [" + key + "] -> " +  key.toUpperCase() );
+
 				fits_keys.push({
 				    key: key.toUpperCase(),
 				    value: obdata.type=="number" ? (obdata.value*1.0) : obdata.value,
@@ -436,11 +414,11 @@ class sbig_driver{
 			    }
 			    
 			    function parse_ob(obdata,key){
-				//console.log("Parse " + key + " : "  + obdata.name + " objects is " + obdata.objects);
+
 				if(obdata.objects!==undefined){
 
 				    for(var key in obdata.objects){
-					//console.log("Recurse parse " + key);
+
 					parse_ob(obdata.objects[key],key);
 				    }					
 				    
@@ -451,21 +429,6 @@ class sbig_driver{
 
 			    var obdata=msg.data.ob; //JSON.parse(msg.data.ob);
 			    parse_ob(obdata, "root");
-			    
-			    //console.log("Writing keys " + JSON.stringify(fits_keys));
-			    fits_keys.push({
-				key: "DATE-OBS",
-				value: date.toISOString(), 
-				comment: "Observation start time"
-			    });
-
-			    //var cooling_info=cam.dev.get_temp();
-			    
-			    fits_keys.push({
-				key: "CCDTEMP",
-				value: Math.floor(cooling_info.ccd_temp*100.0)/100.0, 
-				comment: "CCD temperature at the end of exposure"
-			    });
                             
 			    var obj_opts=obdata.objects.object_settings.objects;
 			    if(	obj_opts.filter.value != undefined &&
@@ -477,7 +440,25 @@ class sbig_driver{
 				    value: obj_opts.filter.value, 
 				    comment: "Filter"
 				});
+                            }else{
+                                fits_keys = fits_keys.filter(obj => obj.key !== "FILTER"); 
                             }
+                            
+			    if( obj_opts.imagetyp.value == "bias" ){
+                                 fits_keys = fits_keys.filter(obj => obj.key !== "EXPTIME"); 
+                            }
+			    
+			    fits_keys.push({
+				key: "DATE-OBS",
+				value: date.toISOString(), 
+				comment: "Observation start time"
+			    });
+			    
+			    fits_keys.push({
+				key: "CCDTEMP",
+				value: Math.floor(cooling_info.ccd_temp*100.0)/100.0, 
+				comment: "CCD temperature at the end of exposure"
+			    });
                             
 			    fits_keys.push({
 			        key: "IMAGETYP",
@@ -487,8 +468,7 @@ class sbig_driver{
                             
 			    fifi.set_header_key(fits_keys, function(){
 				//console.log("Done writing keys !");
-			    });
-			    
+			    });			    
 			    
 			}
 			
@@ -510,17 +490,13 @@ class sbig_driver{
                                          ]
 					);
 
-			// console.log("EX DATA : L= " + idata.length );
-			// for(var i=0;i<20;i++)
-			// 	console.log("Data " + i + " = " + idata[i] );
 			reply({ date: date, file_name : fname});
-			//reply({ width : image.width(), height: image.height()}, [{ name : "imaging_data", data : idata}] );
-
 
 			break;
-		    default: break;
-		    }
 
+		    default: break;
+
+		    }
 
 		});
 
@@ -536,6 +512,7 @@ class sbig_driver{
 		cam.dev.stop_exposure();
 		reply({});
 	    }
+            
 	};
     }
 
@@ -546,15 +523,11 @@ class sbig_driver{
 	console.log("Cam cooling info = " + JSON.stringify(cam.get_temp()));
     }
 
-
     take_image(cam_id, opts, cb){
 
 	var expo_mode=this.expo_mode=opts.mode;
 	var ccd_opts=opts.objects.ccd_settings.objects;
 	var obj_opts=opts.objects.object_settings.objects;
-
-	// console.log("Take image CCD OPTS = " + JSON.stringify(ccd_opts,null,5));
-	// console.log("Take image OBJ OPTS = " + JSON.stringify(obj_opts,null,5));
 
 	var cam=this.cams[cam_id];
 	cam.mode=expo_mode;
@@ -569,7 +542,6 @@ class sbig_driver{
 	    dual_channel : true,
 	    readout_mode: ccd_opts.binning.value+"x"+ccd_opts.binning.value
 	};
-
         
 	if(	obj_opts.filter.value != undefined &&
                 ( obj_opts.imagetyp.value != "bias" &&
@@ -589,8 +561,11 @@ class sbig_driver{
 	    }
 	    catch( e){
 		console.log("Sorry, Cannot move any filter wheel " + e);
-	    }
-	}
+	    }            
+            console.log("Setting filter");
+        }else{
+            console.log("Don't setting filter");
+        }
 	
 	switch(obj_opts.imagetyp.value){
 	case "science":
@@ -627,19 +602,6 @@ class sbig_driver{
 
 	console.log("Starting exposure " + JSON.stringify(cam_options, null, 4));
 
-	// const emitter = new EventEmitter();
-
-	// emitter.on('grab', (pc) => {
-	//     console.log('### GRAB ...' + pc);
-	// })
-	// emitter.on('data', (evt) => {
-	//     console.log(evt);
-	// })
-
-	// emitter.on('end', () => {
-	//     console.log('### END ###')
-	// })
-
 	if(expo_mode == "exposure"){
 	    cam.dev.start_exposure(cam_options, cb).then(function(msg){
 		console.log("Exposure Promise done ! " + JSON.stringify(msg));
@@ -654,37 +616,7 @@ class sbig_driver{
 	    });
 	}
 
-	// cam.dev.start_exposure(cam_options, function (expo_message){
-
-	//     console.log("EXPO message : " + JSON.stringify(expo_message));
-
-	//     if(expo_message.started){
-	// 	console.log("Started !");
-	// 	return console.log(expo_message.started);
-	//     }
-
-	//     if(expo_message.type=="new_image"){
-	// 	//var img=expo_message.content;  BUG HERE!
-	// 	console.log("NEW IMAGE !!");
-	// 	var img=cam.dev.last_image; //tbr...
-	// 	cb({ image : img });
-	// 	//var idata=img.get_data();
-
-
-	// 	/*
-	// 	var fifi=new fits.file;
-	// 	var date=new Date();
-
-	// 	fifi.file_name=date.format() +".fits";
-
-	// 	console.log("New image captured,  w= " + img.width() + " h= " + img.height() + " type " + (typeof img) + ", writing FITS file " + fifi.file_name );
-
-	// 	fifi.write_image_hdu(img);
-	// 	*/
-	//     }
-	// });
     }
-
 
     close_device(cam_id){
 	var cam=this.cams[cam_id];
@@ -698,8 +630,6 @@ class sbig_driver{
     open_device(cam_id, cb){
 	var cam=this.cams[cam_id];
 	if(cam.dev !== undefined) cam.dev=new sbig.cam();
-
-	//return new Promise(function(ok, fail){
 
 	cam.dev.initialize(cam_id).then(function (init_message){
 	    //init_message.ccd_info=cam.dev.ccd_info();

@@ -24,8 +24,8 @@ On Mac, add the following line in `.bash_profile`:
 source ~/.nvm/nvm.sh
 ```
 
-## Install dependecies needed by `node-fits` and `node-sbig`:
-    g++ libpng-dev libjpeg-dev libcfitsio-dev libusb-1.0-0-dev libsbigudrv-dev
+## Install dependecies needed by `node-fits` and `node-sbig`. In debian-based OS:
+    sudo apt install g++ libpng-dev libjpeg-dev libcfitsio-dev libusb-1.0-0-dev libsbigudrv-dev
 
 
 ## Install this package

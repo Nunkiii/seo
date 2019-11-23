@@ -592,7 +592,7 @@ class sbig_driver{
 	    var sf=ccd_opts.subframe.objects;
 	    cam_options.subframe = [
                 sf.x_init.value, // nLeft
-                sf.y_init.value, // nTeft
+                sf.y_init.value, // nTop
                 sf.x_final.value - sf.x_init.value, // nWidth
                 sf.y_final.value - sf.y_init.value // nHeight
             ];

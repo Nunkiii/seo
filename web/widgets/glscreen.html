@@ -1676,7 +1676,13 @@
 
 	     //console.log("Set val " + JSON.stringify(ipix) );
 	     
-	     cb({ pixel: ipix, value: Math.floor(pixel_value*1000)/1000.0 });
+	     // cb({ pixel: ipix, value: Math.floor(pixel_value*1000)/1000.0 });
+
+             // Reverse height scale for calculating subframe nTop in csbigcam.cpp 
+	     cb({ pixel: [ ipix[0],this.height-ipix[1] ], value: Math.floor(pixel_value*1000)/1000.0 });
+//             console.log(ipix+"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+             
 	     //cinfo_tpl.elements.imgpos.set_value(ipix);
 	     //cinfo_tpl.elements.pixval.set_value(Math.floor(pixel_value*1000)/1000.0);
 	     

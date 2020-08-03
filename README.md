@@ -25,7 +25,14 @@ On Linux (other OS are treated in the previous link):
 
 ## Install dependecies needed by `node-fits` and `node-sbig`. In debian-based OS:
 
-    sudo apt install g++ libpng-dev libcfitsio-dev libjpeg9-dev libusb-1.0-0-dev libsbig
+    sudo apt install g++ libpng-dev libcfitsio-dev libjpeg9-dev libusb-1.0-0-dev
+
+## Install repository for libsbig:
+
+    sudo add-apt-repository ppa:mutlaqja/ppa
+    sudo apt-get update
+    
+    sudo apt install libsbig
 
 
 ## Install this package
